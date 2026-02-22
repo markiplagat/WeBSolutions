@@ -239,3 +239,16 @@ a{text-decoration:none;color:inherit}
 @media (max-width: 900px){
   .why{grid-template-columns:1fr;}
 }
+
+/* bottom call-to-action bar */
+.bottom-cta{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:#fff;
+  padding:54px 0;
+}
+.bottom-cta__inner{text-align:center;}
+.bottom-cta__title{margin:0 0 10px;font-size:28px;}
+.bottom-cta__sub{margin:0 0 18px;color:rgba(255,255,255,.9);}
+
+/* footer spacing */
+.footer__inner{display:flex;justify-content:center;}
