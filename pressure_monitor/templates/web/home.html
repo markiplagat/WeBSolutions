@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Pressure Monitor{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__icon" aria-hidden="true">
+      <!-- simple pulse icon -->
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+        <path d="M3 12h4l2-6 4 12 2-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <h1 class="hero__title">Prevent Pressure Ulcers<br>with Real-Time Monitoring</h1>
+
+    <p class="hero__subtitle">
+      Advanced pressure mapping technology that helps patients, clinicians,
+      and healthcare teams work together to reduce pressure ulcer risk.
+    </p>
+
+    <div class="hero__cta">
+      <a class="btn btn--primary btn--lg" href="#">Get Started Free</a>
+      <a class="btn btn--secondary btn--lg" href="#">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<section class="metrics">
+  <div class="container metrics__grid">
+    <div class="metric">
+      <div class="metric__value">2-Second</div>
+      <div class="metric__label">Real-time updates</div>
+    </div>
+    <div class="metric">
+      <div class="metric__value">24/7</div>
+      <div class="metric__label">Continuous Monitoring</div>
+    </div>
+    <div class="metric">
+      <div class="metric__value">Instant</div>
+      <div class="metric__label">Alert System</div>
+    </div>
+    <div class="metric">
+      <div class="metric__value">100%</div>
+      <div class="metric__label">Data Privacy</div>
+    </div>
+  </div>
+</section>
+{% endblock %}
