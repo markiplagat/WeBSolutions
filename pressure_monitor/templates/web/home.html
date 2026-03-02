@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}Pressure Monitor{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__icon" aria-hidden="true">
+      <!-- simple pulse icon -->
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+        <path d="M3 12h4l2-6 4 12 2-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <h1 class="hero__title">Prevent Pressure Ulcers<br>with Real-Time Monitoring</h1>
+
+    <p class="hero__subtitle">
+      Advanced pressure mapping technology that helps patients, clinicians,
+      and healthcare teams work together to reduce pressure ulcer risk.
+    </p>
+
+    <div class="hero__cta">
+      <a class="btn btn--primary btn--lg" href="#">Get Started Free</a>
+      <a class="btn btn--secondary btn--lg" href="#">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<section class="metrics">
+  <div class="container metrics__grid">
+    <div class="metric">
+      <div class="metric__value">2-Second</div>
+      <div class="metric__label">Real-time updates</div>
+    </div>
+    <div class="metric">
+      <div class="metric__value">24/7</div>
+      <div class="metric__label">Continuous Monitoring</div>
+    </div>
+    <div class="metric">
+      <div class="metric__value">Instant</div>
+      <div class="metric__label">Alert System</div>
+    </div>
+    <div class="metric">
+      <div class="metric__value">100%</div>
+      <div class="metric__label">Data Privacy</div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="section">
+  <div class="container">
+    <h2 class="section__title">Everything You Need to Manage Pressure</h2>
+    <p class="section__subtitle">
+      Comprehensive tools designed for patients, clinicians, and administrators
+    </p>
+
+    <!-- For Patients -->
+    <div class="feature-group">
+      <div class="feature-group__header">
+        <span class="badge badge--blue">👤</span>
+        <h3>For Patients</h3>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="card__icon">📈</div>
+          <h4>Real-Time Pressure Map</h4>
+          <p>View live color-coded heat maps showing exactly where pressure is building up.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">🔔</div>
+          <h4>Smart Alerts</h4>
+          <p>Receive instant notifications when high pressure is detected, helping you adjust early.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">📊</div>
+          <h4>Trend Analysis</h4>
+          <p>Track your pressure patterns over time with easy-to-understand charts and insights.</p>
+        </article>
+      </div>
+    </div>
+
+    <!-- For Clinicians -->
+    <div class="feature-group">
+      <div class="feature-group__header">
+        <span class="badge badge--green">🩺</span>
+        <h3>For Clinicians</h3>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="card__icon">🗂️</div>
+          <h4>Patient Dashboard</h4>
+          <p>Monitor all assigned patients from one dashboard with risk levels and flagged events.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">🔁</div>
+          <h4>Comparison Tools</h4>
+          <p>Compare current data with previous periods to identify improvement or deterioration.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">💬</div>
+          <h4>Direct Communication</h4>
+          <p>Respond to patient concerns in context with data-linked messaging and notes.</p>
+        </article>
+      </div>
+    </div>
+
+    <!-- For Administrators -->
+    <div class="feature-group">
+      <div class="feature-group__header">
+        <span class="badge badge--purple">🛡️</span>
+        <h3>For Administrators</h3>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="card__icon">👥</div>
+          <h4>User Management</h4>
+          <p>Create and manage patient and clinician accounts with full control over access.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">🔒</div>
+          <h4>Access Control</h4>
+          <p>Assign clinicians to specific patients to ensure governance, privacy, and compliance.</p>
+        </article>
+
+        <article class="card">
+          <div class="card__icon">📋</div>
+          <h4>System Overview</h4>
+          <p>Monitor usage, overall statistics, and data distribution across your organisation.</p>
+        </article>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="how" class="section section--soft">
+  <div class="container">
+    <h2 class="section__title">How It Works</h2>
+    <p class="section__subtitle">Simple, effective pressure monitoring in three steps</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step__num">1</div>
+        <h4>Monitor in Real-Time</h4>
+        <p>
+          Pressure sensors collect data every 2 seconds and display it as an easy-to-read
+          color-coded heat map.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step__num">2</div>
+        <h4>Get Instant Alerts</h4>
+        <p>
+          When high pressure is detected, patients receive immediate alerts to adjust their
+          position and reduce risk.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step__num">3</div>
+        <h4>Collaborate & Improve</h4>
+        <p>
+          Clinicians review data, communicate with patients, and track improvements over time
+          using trends and comparisons.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why" class="section">
+  <div class="container">
+    <div class="why">
+      <div class="why__left">
+        <h2 class="why__title">Why Choose Our Platform?</h2>
+
+        <ul class="checklist">
+          <li>
+            <span class="checklist__tick">✓</span>
+            <div>
+              <strong>Evidence-Based Prevention</strong>
+              <div class="checklist__sub">Built on best practices for pressure ulcer prevention.</div>
+            </div>
+          </li>
+
+          <li>
+            <span class="checklist__tick">✓</span>
+            <div>
+              <strong>User-Friendly Design</strong>
+              <div class="checklist__sub">Simple interfaces for patients and clinicians.</div>
+            </div>
+          </li>
+
+          <li>
+            <span class="checklist__tick">✓</span>
+            <div>
+              <strong>Comprehensive Data</strong>
+              <div class="checklist__sub">Trends, comparisons, and clear reporting.</div>
+            </div>
+          </li>
+
+          <li>
+            <span class="checklist__tick">✓</span>
+            <div>
+              <strong>Secure & Private</strong>
+              <div class="checklist__sub">Role-based access control to protect patient data.</div>
+            </div>
+          </li>
+
+          <li>
+            <span class="checklist__tick">✓</span>
+            <div>
+              <strong>Better Outcomes</strong>
+              <div class="checklist__sub">Early intervention reduces risk and improves care.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <aside class="why__card">
+        <div class="why__pulse" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+            <path d="M3 12h4l2-6 4 12 2-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <h3 class="why__cardTitle">Ready to Get Started?</h3>
+        <p class="why__cardSub">
+          Join healthcare providers using our platform to improve patient outcomes.
+        </p>
+
+        <a class="btn btn--dark btn--lg" href="#">Start Free Trial</a>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="bottom-cta">
+  <div class="container bottom-cta__inner">
+    <h2 class="bottom-cta__title">Take Control of Pressure Management</h2>
+    <p class="bottom-cta__sub">Start monitoring pressure data and preventing ulcers today</p>
+    <a class="btn btn--white btn--lg" href="#">Get Started Now</a>
+  </div>
+</section>
+{% endblock %}
