@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from web.views_patient import patient_dashboard
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -28,4 +29,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("web.urls")),
     path("accounts/", include("web.auth_urls")),
+    path("patient/dashboard/", patient_dashboard, name="patient_dashboard"),
 ]
