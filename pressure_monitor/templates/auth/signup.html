@@ -31,7 +31,14 @@
 
       {% if form.errors %}
         <div class="auth-error">
-          Please fix the errors below.
+          {% for error in form.non_field_errors %}
+            {{ error }}<br>
+          {% endfor %}
+          {% for field in form %}
+            {% for error in field.errors %}
+              {{ field.label }}: {{ error }}<br>
+            {% endfor %}
+          {% endfor %}
         </div>
       {% endif %}
 
@@ -39,18 +46,18 @@
         {% csrf_token %}
 
         <label>Full Name</label>
-        <input type="text" name="full_name" placeholder="John Smith" value="{{ request.POST.full_name }}" required>
+        <input type="text" name="full_name" placeholder="John Smith" value="{{ form.full_name.value|default:'' }}" required>
 
         <label>Email</label>
-        <input type="email" name="email" placeholder="email@example.com" value="{{ request.POST.email }}" required>
+        <input type="email" name="email" placeholder="email@example.com" value="{{ form.email.value|default:'' }}" required>
 
         <label>Password</label>
         <input type="password" name="password" placeholder="••••••••" required>
 
         <label>Account Type</label>
         <select name="account_type" required>
-          <option value="PATIENT">Patient</option>
-          <option value="CLINICIAN">Clinician</option>
+          <option value="PATIENT" {% if form.account_type.value == "PATIENT" %}selected{% endif %}>Patient</option>
+          <option value="CLINICIAN" {% if form.account_type.value == "CLINICIAN" %}selected{% endif %}>Clinician</option>
         </select>
 
         <button class="auth-btn" type="submit">Create Account</button>
