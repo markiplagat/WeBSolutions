@@ -1,0 +1,20 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Clinician Dashboard</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body class="auth-page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2>Clinician Dashboard</h2>
+      <p>Welcome {{ request.user.get_full_name|default:request.user.username }}. You are logged in as a clinician.</p>
+      <a class="btn btn--primary" href="/">Go to Home</a>
+      <a class="btn btn--ghost" href="/accounts/logout/">Log out</a>
+    </div>
+  </div>
+</body>
+</html>
