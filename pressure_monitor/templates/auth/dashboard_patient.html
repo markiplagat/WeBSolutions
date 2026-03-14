@@ -13,7 +13,10 @@
       <h2>Patient Dashboard</h2>
       <p>Welcome {{ request.user.get_full_name|default:request.user.username }}. You are logged in as a patient.</p>
       <a class="btn btn--primary" href="/">Go to Home</a>
-      <a class="btn btn--ghost" href="/accounts/logout/">Log out</a>
+      <form method="post" action="/accounts/logout/" style="display:inline; margin-left:.5rem;">
+        {% csrf_token %}
+        <button class="btn btn--ghost" type="submit">Log out</button>
+      </form>
     </div>
   </div>
 </body>
