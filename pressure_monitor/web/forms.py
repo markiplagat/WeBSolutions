@@ -24,18 +24,18 @@ class SignupForm(forms.Form):
         last_name = " ".join(full_name.split(" ")[1:]) if len(full_name.split(" ")) > 1 else ""
 
         user = User.objects.create_user(
-            username=email,     #  email as username
+            username=email,     # email as username
             email=email,
             password=password,
             first_name=first_name,
             last_name=last_name,
         )
 
-        UserProfile.objects.create(user=user, role=role)
+        user_profile = UserProfile.objects.create(user=user, role=role)
 
         if role == UserRole.PATIENT:
-            PatientProfile.objects.create(user=user)
+            PatientProfile.objects.create(user_profile=user_profile)
         elif role == UserRole.CLINICIAN:
-            ClinicianProfile.objects.create(user=user)
+            ClinicianProfile.objects.create(user_profile=user_profile)
 
         return user

@@ -89,32 +89,4 @@ def demo_login(request, role: str):
     login(request, user)
     return redirect("dashboard")
 
-
-@require_POST
-def demo_login(request, role: str):
-    """
-    Quick login for demo accounts (only if DEBUG=True).
-    role: patient | clinician | admin
-    """
-    if not settings.DEBUG:
-        return redirect("login")
-
-    role = role.lower()
-    email_map = {
-        "patient": "patient@demo.com",
-        "clinician": "clinician@demo.com",
-        "admin": "admin@demo.com",
-    }
-    email = email_map.get(role)
-    if not email:
-        return redirect("login")
-
-    try:
-        user = User.objects.get(username=email)
-    except User.DoesNotExist:
-        messages.error(request, "Demo user not found. Create demo users first.")
-        return redirect("login")
-
-    login(request, user)
-    return redirect("home")
     
