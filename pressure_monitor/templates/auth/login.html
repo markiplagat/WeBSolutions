@@ -46,7 +46,7 @@
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ next }}">
         <label>Email</label>
-        <input type="text" name="username" placeholder="email@example.com" value="{{ form.username.value }}" required>
+        <input type="text" name="username" placeholder="email@example.com" value="{{ form.email.value }}" required>
 
         <label>Password</label>
         <input type="password" name="password" placeholder="••••••••" required>

@@ -7,17 +7,199 @@
   <title>Patient Dashboard</title>
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
-<body class="auth-page">
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <h2>Patient Dashboard</h2>
-      <p>Welcome {{ request.user.get_full_name|default:request.user.username }}. You are logged in as a patient.</p>
-      <a class="btn btn--primary" href="/">Go to Home</a>
+<body class="dash-page">
+
+<header class="dash-topbar">
+  <div class="dash-container dash-topbar__inner">
+    <div class="dash-title">
+      <div class="dash-avatar">👤</div>
+      <div>
+        <div class="dash-title__h">Patient Dashboard</div>
+        <div class="dash-title__sub">Monitor your pressure distribution</div>
+      </div>
+    </div>
+
+    <div class="dash-actions">
+      <button class="toggle">{{ alerts_on|yesno:"Alerts On,Alerts Off" }}</button>
       <form method="post" action="/accounts/logout/" style="display:inline; margin-left:.5rem;">
         {% csrf_token %}
         <button class="btn btn--ghost" type="submit">Log out</button>
       </form>
     </div>
   </div>
+</header>
+
+<main class="dash-container dash-main">
+
+  <section class="grid2">
+    <!-- Heat map card -->
+    <div class="card2">
+      <div class="card2__head">
+        <div>
+          <h2>Realtime Pressure Heat Map</h2>
+          <p>Live weight distribution while sitting</p>
+        </div>
+      </div>
+
+      <div class="heatmap-wrap">
+        <div class="heatmap">
+          {% for row in grid %}
+            <div class="heatmap-row">
+              {% for cell in row %}
+                <div class="cell level-{{ cell }}"></div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="legend">
+          <div><span class="swatch level-0"></span> Low (&lt;20)</div>
+          <div><span class="swatch level-1"></span> Normal (20-40)</div>
+          <div><span class="swatch level-2"></span> Moderate (40-60)</div>
+          <div><span class="swatch level-3"></span> High (60-80)</div>
+          <div><span class="swatch level-4"></span> Critical (&gt;80)</div>
+        </div>
+
+        <div class="stats3">
+          <div class="stat">
+            <div class="stat__label">Max Pressure</div>
+            <div class="stat__value">{{ max_pressure }} <span>mmHg</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat__label">Avg Pressure</div>
+            <div class="stat__value">{{ avg_pressure }} <span>mmHg</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat__label">Status</div>
+            <div class="stat__value stat__value--bad">{{ status }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="stack">
+      <div class="card2">
+        <div class="card2__head">
+          <h3>Recent Alerts</h3>
+        </div>
+        <div class="list">
+          {% for a in recent_alerts %}
+            <div class="list-item">
+              <div>
+                <div class="list-item__title">{{ a.title }}</div>
+                <div class="list-item__sub">{{ a.value }}</div>
+              </div>
+              <div class="list-item__time">{{ a.time }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card2">
+        <div class="card2__head">
+          <h3>Pressure Relief Tips</h3>
+        </div>
+        <ul class="tips">
+          {% for t in tips %}
+            <li>{{ t }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trends -->
+  <section class="card2" style="margin-top:16px;">
+    <div class="card2__head row-between">
+      <div>
+        <h3>Pressure Trends</h3>
+        <p>Monitor changes in pressure metrics over time</p>
+      </div>
+      <div class="chips">
+        <button class="chip chip--active">1 Hour</button>
+        <button class="chip">6 Hours</button>
+        <button class="chip">24 Hours</button>
+      </div>
+    </div>
+
+    <div class="chart">
+      <svg viewBox="0 0 600 200" preserveAspectRatio="none">
+        <!-- simple line chart -->
+        <polyline
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          points="{% for v in trend_points %}{{ forloop.counter0|add:1|floatformat:0 }},{% endfor %}"
+        />
+      </svg>
+      <div class="chart-note">Demo chart (we’ll replace with real chart + correct scaling next step)</div>
+    </div>
+
+    <div class="metric-row">
+      <div class="metric-mini">
+        <strong>Peak Pressure</strong>
+        <p>The highest pressure point on your body. Values above 80 mmHg increase ulcer risk.</p>
+      </div>
+      <div class="metric-mini">
+        <strong>Average Pressure</strong>
+        <p>Your overall pressure distribution. Lower is better for comfort and circulation.</p>
+      </div>
+      <div class="metric-mini">
+        <strong>Contact Area</strong>
+        <p>The percentage of your body in contact with the surface. More area = better distribution.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Communication (static for now) -->
+  <section class="card2" style="margin-top:16px;">
+    <div class="card2__head">
+      <h3>Communication</h3>
+      <p>Flag concerns and discuss pressure data with your clinician</p>
+    </div>
+
+    <div class="msg-box">
+      <input class="msg-input" placeholder="Add a comment about pressure data..." disabled>
+      <button class="send-btn" disabled>➤</button>
+    </div>
+
+    <div class="thread">
+      <div class="msg">
+        <div class="msg__avatar">👤</div>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <strong>John Smith</strong> <span>3/5/2026, 10:09 AM • Data at 14:30</span>
+            <span class="pill2 pill2--bad">92 mmHg</span>
+          </div>
+          <div class="msg__text">Experiencing discomfort in lower back region. Pressure seems higher than usual.</div>
+
+          <div class="reply">
+            <div class="msg__avatar msg__avatar--clin">🩺</div>
+            <div class="msg__body">
+              <div class="msg__meta"><strong>Dr. Amanda Wilson</strong> <span>3/5/2026, 10:39 AM</span></div>
+              <div class="msg__text">
+                Thanks for flagging this. I can see the elevated pressure reading. Try adjusting your position and using the lumbar cushion.
+                I’ll monitor this over the next few hours.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg">
+        <div class="msg__avatar">👤</div>
+        <div class="msg__body">
+          <div class="msg__meta">
+            <strong>John Smith</strong> <span>3/5/2026, 9:09 AM • Data at 12:15</span>
+            <span class="pill2">68 mmHg</span>
+          </div>
+          <div class="msg__text">Pressure distribution looks better today after following yesterday’s positioning advice.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
 </body>
 </html>
