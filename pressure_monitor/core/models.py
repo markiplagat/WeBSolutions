@@ -77,9 +77,14 @@ class Alert(models.Model):
 class Message(models.Model):
     patient_profile = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, related_name="messages")
     clinician_profile = models.ForeignKey(ClinicianProfile, on_delete=models.CASCADE, related_name="messages")
+    sender_role = models.CharField(
+        max_length=20,
+        choices=UserRole.choices,
+        default=UserRole.PATIENT,
+    )
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Message [{self.pk}] {self.patient_profile.user.username} <-> {self.clinician_profile.user.username}"
+        return f"Message [{self.pk}] {self.patient_profile.user.username} <-> {self.clinician_profile.user.username} {self.sender_role}"
         

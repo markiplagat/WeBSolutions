@@ -1,12 +1,45 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+
+from core.models import (ClinicianProfile, Message, PatientProfile, UserRole)
+
 
 @login_required
 def patient_dashboard(request):
-    # Step 1: static demo data
+    user = request.user
+    # get patient profile
+    try:
+        patient_profile = user.userprofile.patient_profile
+    except Exception:
+        return redirect("dashboard")
+
+    # assigned clinician fallback
+    clinician = (
+        ClinicianProfile.objects.filter(assigned_patients=patient_profile).first()
+        or ClinicianProfile.objects.first()
+    )
+
+    if request.method == "POST":
+        body = request.POST.get("message", "").strip()
+        if body and clinician:
+            Message.objects.create(
+                patient_profile=patient_profile,
+                clinician_profile=clinician,
+                sender_role=UserRole.PATIENT,
+                body=body,
+            )
+        return redirect("dashboard_patient")
+
+    message_thread = []
+    if clinician:
+        message_thread = Message.objects.filter(
+            patient_profile=patient_profile,
+            clinician_profile=clinician,
+        ).order_by("created_at")
+
     context = {
         "alerts_on": True,
-        "patient_name": request.user.get_full_name() or request.user.username,
+        "patient_name": user.get_full_name() or user.username,
         "max_pressure": 98,
         "avg_pressure": 35,
         "status": "Critical",
@@ -21,7 +54,6 @@ def patient_dashboard(request):
             "Maintain good posture",
             "Stay hydrated and nourished",
         ],
-        # 12x12 demo grid (we’ll upgrade to 32x32 later)
         "grid": [
             [0,0,1,1,1,1,1,1,1,1,0,0],
             [0,1,1,2,2,2,2,2,2,1,1,0],
@@ -37,6 +69,8 @@ def patient_dashboard(request):
             [0,0,1,1,1,1,1,1,1,1,0,0],
         ],
         "trend_points": [80, 70, 90, 65, 68, 88, 82, 86, 90, 100, 78, 82],
+        "message_thread": message_thread,
+        "clinician": clinician,
     }
-    return render(request, "patient/dashboard.html", context)
+    return render(request, "auth/dashboard_patient.html", context)
 
