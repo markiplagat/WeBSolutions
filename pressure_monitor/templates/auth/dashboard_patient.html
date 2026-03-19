@@ -152,52 +152,44 @@
     </div>
   </section>
 
-  <!-- Communication (static for now) -->
+  <!-- Communication -->
   <section class="card2" style="margin-top:16px;">
     <div class="card2__head">
       <h3>Communication</h3>
       <p>Flag concerns and discuss pressure data with your clinician</p>
     </div>
 
-    <div class="msg-box">
-      <input class="msg-input" placeholder="Add a comment about pressure data..." disabled>
-      <button class="send-btn" disabled>➤</button>
-    </div>
+    {% if clinician %}
+      <form method="post" class="msg-box" style="margin-bottom:0.75rem;">
+        {% csrf_token %}
+        <input class="msg-input" type="text" name="message" placeholder="Add a comment about pressure data..." required>
+        <button class="send-btn" type="submit">➤</button>
+      </form>
 
-    <div class="thread">
-      <div class="msg">
-        <div class="msg__avatar">👤</div>
-        <div class="msg__body">
-          <div class="msg__meta">
-            <strong>John Smith</strong> <span>3/5/2026, 10:09 AM • Data at 14:30</span>
-            <span class="pill2 pill2--bad">92 mmHg</span>
-          </div>
-          <div class="msg__text">Experiencing discomfort in lower back region. Pressure seems higher than usual.</div>
-
-          <div class="reply">
-            <div class="msg__avatar msg__avatar--clin">🩺</div>
+      <div class="thread">
+        {% for m in message_thread %}
+          <div class="msg" style="margin-bottom:.85rem;">
+            <div class="msg__avatar">{% if m.sender_role == 'CLINICIAN' %}🩺{% else %}👤{% endif %}</div>
             <div class="msg__body">
-              <div class="msg__meta"><strong>Dr. Amanda Wilson</strong> <span>3/5/2026, 10:39 AM</span></div>
-              <div class="msg__text">
-                Thanks for flagging this. I can see the elevated pressure reading. Try adjusting your position and using the lumbar cushion.
-                I’ll monitor this over the next few hours.
+              <div class="msg__meta">
+                <strong>{% if m.sender_role == 'CLINICIAN' %}{{ clinician.user.get_full_name|default:clinician.user.username }}{% else %}You{% endif %}</strong>
+                <span>{{ m.created_at|date:"n/j/Y, P" }}</span>
+                {% if m.sender_role == 'PATIENT' %}
+                  <span class="pill2">My message</span>
+                {% endif %}
               </div>
+              <div class="msg__text">{{ m.body }}</div>
             </div>
           </div>
-        </div>
+        {% empty %}
+          <p>No messages yet. Send your first note to {{ clinician.user.get_full_name|default:clinician.user.username }}.</p>
+        {% endfor %}
       </div>
-
-      <div class="msg">
-        <div class="msg__avatar">👤</div>
-        <div class="msg__body">
-          <div class="msg__meta">
-            <strong>John Smith</strong> <span>3/5/2026, 9:09 AM • Data at 12:15</span>
-            <span class="pill2">68 mmHg</span>
-          </div>
-          <div class="msg__text">Pressure distribution looks better today after following yesterday’s positioning advice.</div>
-        </div>
+    {% else %}
+      <div class="blank-state">
+        <p>No clinician assigned yet. Please contact your clinic administrator.</p>
       </div>
-    </div>
+    {% endif %}
   </section>
 
 </main>
