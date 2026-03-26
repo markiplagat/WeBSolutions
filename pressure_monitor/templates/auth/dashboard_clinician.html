@@ -29,49 +29,37 @@
 </header>
 
 <main class="dash-container dash-main">
-  <section class="card2">
-    <div class="card2__head row-between">
-      <div>
-        <h2>Patient Chat</h2>
-        <p>Assigned patient conversation</p>
-      </div>
+  <section class="cards" style="margin-top:10px; grid-template-columns:repeat(4,1fr);">
+    <div class="card"><div class="card__icon">👥</div><h4>Total Patients</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.total_patients }}</p></div>
+    <div class="card"><div class="card__icon">⚠️</div><h4>High Risk</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.high_risk }}</p></div>
+    <div class="card"><div class="card__icon">🔔</div><h4>Active Alerts</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.active_alerts }}</p></div>
+    <div class="card"><div class="card__icon">📈</div><h4>Improving</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.improving }}</p></div>
+  </section>
+
+  <section class="card2" style="margin-top:16px;">
+    <div class="card2__head row-between"><div><h3>Flagged Pressure Events</h3><p>Automatically detected events requiring review</p></div></div>
+    <div class="list">
+      {% for e in flagged_events %}
+        <div class="list-item"><div><div class="list-item__title">{{ e.patient }}</div><div class="list-item__sub">{{ e.time }} • Peak {{ e.peak }} • {{ e.duration }}</div></div><div style="text-align:right;"><span style="font-size:12px; font-weight:800; color:{% if e.status == 'active' %}#dc2626{% else %}#16a34a{% endif %};">{{ e.status|title }}</span><div style="margin-top:8px;"><button class="btn btn--ghost" style="font-size:12px;">View Details</button></div></div></div>
+      {% endfor %}
     </div>
+  </section>
 
+  <section class="card2" style="margin-top:16px;">
+    <div class="row-between" style="margin-bottom:10px;"><div><h3>Patient Analysis</h3><p style="color:var(--muted); margin:2px 0;">Detailed pressure metrics and comparisons</p></div><div style="display:flex; gap:.5rem; align-items:center;"><select style="padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">{% for p in assigned_patients %}<option>{% if p.user.get_full_name %}{{ p.user.get_full_name }}{% else %}{{ p.user.username }}{% endif %}</option>{% endfor %}</select><button class="btn btn--primary">Generate Report</button></div></div>
+    <div class="metric-row"><div class="metric-mini"><strong>Risk Level</strong><p>{{ analysis.risk }}</p></div><div class="metric-mini"><strong>Current Peak</strong><p>{{ analysis.current_peak }} mmHg</p></div><div class="metric-mini"><strong>Average</strong><p>{{ analysis.average }} mmHg</p></div><div class="metric-mini"><strong>Last Alert</strong><p>{{ analysis.last_alert }}</p></div></div>
+  </section>
+
+  <section class="card2" style="margin-top:16px;">
+    <div class="card2__head"><h3>Communication</h3><p>Flag concerns and discuss pressure data with your patients</p></div>
     {% if assigned_patients %}
-      <form method="get" style="margin-bottom: 0.75rem;">
-        <label for="patient">Patient:</label>
-        <select id="patient" name="patient" onchange="this.form.submit()">
-          {% for p in assigned_patients %}
-            <option value="{{ p.id }}" {% if p == selected_patient %}selected{% endif %}>{{ p.user.get_full_name|default:p.user.username }}</option>
-          {% endfor %}
-        </select>
-      </form>
-
-      <div class="thread" style="max-height: 350px; overflow-y:auto; margin-bottom:1rem;">
+      <form method="get" style="margin-top:10px; margin-bottom:8px;"><label for="patient">Patient:</label><select id="patient" name="patient" onchange="this.form.submit()" style="margin-left:8px; padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">{% for p in assigned_patients %}<option value="{{ p.id }}" {% if p == selected_patient %}selected{% endif %}>{{ p.user.get_full_name|default:p.user.username }}</option>{% endfor %}</select></form>
+      <div class="thread" style="max-height:300px; overflow-y:auto; margin-bottom:8px;">
         {% for m in message_thread %}
-          <div class="msg" style="margin-bottom:.65rem;">
-            <div class="msg__avatar">{% if m.sender_role == 'CLINICIAN' %}🩺{% else %}👤{% endif %}</div>
-            <div class="msg__body">
-              <div class="msg__meta">
-                <strong>{% if m.sender_role == 'CLINICIAN' %}You{% else %}{{ selected_patient.user.get_full_name|default:selected_patient.user.username }}{% endif %}</strong>
-                <span>{{ m.created_at|date:"n/j/Y, P" }}</span>
-              </div>
-              <div class="msg__text">{{ m.body }}</div>
-            </div>
-          </div>
-        {% empty %}
-          <p>No messages yet. Start the conversation below.</p>
-        {% endfor %}
+          <div class="msg" style="margin-bottom:.65rem;"><div class="msg__avatar">{% if m.sender_role == 'CLINICIAN' %}🩺{% else %}👤{% endif %}</div><div class="msg__body"><div class="msg__meta"><strong>{% if m.sender_role == 'CLINICIAN' %}You{% else %}{{ selected_patient.user.get_full_name|default:selected_patient.user.username }}{% endif %}</strong> <span>{{ m.created_at|date:"n/j/Y, P" }}</span></div><div class="msg__text">{{ m.body }}</div></div></div>
+        {% empty %}<p>No messages yet for this patient.</p>{% endfor %}
       </div>
-
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
-        <div class="msg-box">
-          <input class="msg-input" type="text" name="message" placeholder="Send a reply to your patient..." required>
-          <button class="send-btn" type="submit">➤</button>
-        </div>
-      </form>
+      <form method="post"><input type="hidden" name="patient_id" value="{{ selected_patient.id }}"/><div class="msg-box"><input class="msg-input" type="text" name="message" placeholder="Add a comment about pressure data..." required><button class="send-btn" type="submit">➤</button></div></form>
     {% else %}
       <p>You have no assigned patients yet.</p>
     {% endif %}
