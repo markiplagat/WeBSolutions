@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 from core.models import UserRole
 from .forms import SignupForm
+from .permissions import require_role
 
 
 def _dashboard_for_user(user):
@@ -46,17 +47,17 @@ def dashboard(request):
     return redirect(target)
 
 
-@login_required
+@require_role(UserRole.PATIENT)
 def dashboard_patient(request):
     return render(request, "auth/dashboard_patient.html")
 
 
-@login_required
+@require_role(UserRole.CLINICIAN)
 def dashboard_clinician(request):
     return render(request, "auth/dashboard_clinician.html")
 
 
-@login_required
+@require_role(UserRole.ADMIN)
 def dashboard_admin(request):
     return render(request, "auth/dashboard_admin.html")
 
@@ -89,4 +90,3 @@ def demo_login(request, role: str):
     login(request, user)
     return redirect("dashboard")
 
-    
