@@ -422,22 +422,89 @@ a{text-decoration:none;color:inherit}
 .heatmap{
   margin:0 auto;
   width:max-content;
+  max-height:420px;
+  overflow:auto;
   background:#fff;
   border:1px solid rgba(15,23,42,.08);
   padding:10px;
   border-radius:14px;
 }
-.heatmap-row{display:flex;gap:4px;margin-bottom:4px;}
+.heatmap-container{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  min-height:360px;
+}
+.heatmap-canvas{
+  display:block;
+  margin:0 auto;
+  max-width:100%;
+  min-width:320px;
+  min-height:320px;
+  background:#fff;
+  border:1px solid rgba(15,23,42,.08);
+  border-radius:14px;
+}
+.heatmap-timestamp{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:8px;
+}.heatmap-mini-canvas{
+  display:block;
+  width:96px;
+  height:96px;
+  margin:0 auto;
+  border-radius:10px;
+  border:1px solid rgba(15,23,42,.08);
+  background:#fff;
+}
+.heatmap-row{display:flex;gap:3px;margin-bottom:3px;}
 .heatmap-row:last-child{margin-bottom:0;}
+.heatmap-row-small{display:flex;gap:1px;margin-bottom:1px;}
+.heatmap-row-small:last-child{margin-bottom:0;}
 .cell{
-  width:18px;height:18px;border-radius:4px;
+  width:14px;height:14px;border-radius:3px;
   border:1px solid rgba(15,23,42,.06);
+}
+.cell-small{
+  width:5px;height:5px;border:none;border-radius:1px;
 }
 .level-0{background:#2563eb;}   /* low */
 .level-1{background:#22c55e;}   /* normal */
 .level-2{background:#facc15;}   /* moderate */
 .level-3{background:#fb923c;}   /* high */
 .level-4{background:#ef4444;}   /* critical */
+
+.heatmap-container{margin-bottom:12px;}
+.heatmap-timestamp{text-align:center;font-size:11px;color:var(--muted);margin-top:6px;}
+
+.thumbnail-gallery{
+  margin-top:16px; padding-top:12px; border-top:1px solid rgba(15,23,42,.08);
+}
+.thumbnails{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(50px, 1fr));
+  gap:8px;
+}
+.thumbnail{
+  padding:6px; border:2px solid transparent; border-radius:8px; cursor:pointer;
+  background:#f8fafc; transition:all 0.2s;
+}
+.thumbnail:hover{background:#f1f5f9;}
+.thumbnail.active{border-color:#2563eb; background:#dbeafe;}
+.heatmap-mini{
+  width:48px; height:48px; margin:0 auto;
+}
+.thumbnail-label{
+  font-size:9px; color:var(--muted); text-align:center; margin-top:4px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.frame-nav{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.frame-nav button:disabled{opacity:0.5; cursor:not-allowed;}
 
 .legend{
   display:flex; gap:12px; justify-content:center; flex-wrap:wrap;

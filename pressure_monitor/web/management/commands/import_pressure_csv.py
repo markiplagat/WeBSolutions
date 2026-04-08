@@ -68,7 +68,12 @@ class Command(BaseCommand):
                 raise ValueError(
                     f"Inconsistent row lengths in {csv_path}: expected {width}, got {[len(row) for row in frame]}"
                 )
-            normalized.append(frame)
+
+            if width == 32 and len(frame) > 32 and len(frame) % 32 == 0:
+                for i in range(0, len(frame), 32):
+                    normalized.append(frame[i : i + 32])
+            else:
+                normalized.append(frame)
 
         return normalized
 

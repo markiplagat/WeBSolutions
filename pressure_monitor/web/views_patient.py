@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
 
 from core.models import (
     ClinicianProfile,
@@ -152,4 +154,65 @@ def patient_dashboard(request):
         "clinician": clinician,
     }
     return render(request, "auth/dashboard_patient.html", context)
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_pressure_data(request):
+    user = request.user
+    try:
+        patient_profile = user.userprofile.patient_profile
+    except Exception:
+        return JsonResponse({"error": "Patient profile not found"}, status=404)
+
+    device = patient_profile.devices.first()
+    if not device:
+        return JsonResponse({"frames": [], "error": "No device found"}, status=404)
+
+    offset = request.GET.get("offset", 0)
+    try:
+        offset = int(offset)
+    except (TypeError, ValueError):
+        offset = 0
+    offset = max(0, offset)
+
+    def split_into_sections(frame_data):
+        if (
+            isinstance(frame_data, list)
+            and len(frame_data) > 32
+            and len(frame_data[0]) == 32
+            and len(frame_data) % 32 == 0
+            and all(isinstance(row, list) and len(row) == 32 for row in frame_data)
+        ):
+            return [frame_data[i : i + 32] for i in range(0, len(frame_data), 32)]
+        return [frame_data]
+
+    selected_section = None
+    selected_frame = None
+    total_sections = 0
+
+    frames_qs = device.pressure_frames.order_by("-recorded_at").only("id", "data", "recorded_at")
+    for frame in frames_qs:
+        sections = split_into_sections(frame.data) if frame.data else [frame.data]
+        if selected_section is None:
+            if offset < total_sections + len(sections):
+                selected_frame = frame
+                selected_section = sections[offset - total_sections]
+        total_sections += len(sections)
+
+    if selected_frame is None or selected_section is None:
+        return JsonResponse({"frames": [], "total_frames": 0})
+
+    flattened = [float(v) for row in selected_section for v in row]
+    frame_list = [
+        {
+            "id": selected_frame.id,
+            "recorded_at": selected_frame.recorded_at.isoformat(),
+            "data": selected_section,
+            "max_pressure": int(max(flattened)),
+            "avg_pressure": int(sum(flattened) / len(flattened)),
+        }
+    ]
+
+    return JsonResponse({"frames": frame_list, "total_frames": total_sections})
 
