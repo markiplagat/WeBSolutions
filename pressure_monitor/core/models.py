@@ -55,6 +55,21 @@ class Device(models.Model):
         return f"Device {self.name or self.serial_number} for {self.patient_profile.user.username}"
 
 
+class PressureFrame(models.Model):
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="pressure_frames")
+    recorded_at = models.DateTimeField()
+    data = models.JSONField()
+    source_filename = models.CharField(max_length=200, blank=True)
+    frame_index = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-recorded_at", "frame_index"]
+
+    def __str__(self):
+        return f"PressureFrame {self.device} @ {self.recorded_at:%Y-%m-%d %H:%M}" 
+
+
 class PressureReading(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="pressure_readings")
     pressure_value = models.FloatField()
