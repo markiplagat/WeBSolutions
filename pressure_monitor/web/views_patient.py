@@ -33,16 +33,20 @@ def pressure_status(max_pressure):
     if max_pressure > 50:
         return "Elevated"
     return "Normal"
+from django.http import HttpResponseForbidden
+
+from core.models import (ClinicianProfile, Message, PatientProfile, UserRole)
+from .permissions import require_role, get_patient_profile
 
 
-@login_required
+@require_role(UserRole.PATIENT)
 def patient_dashboard(request):
     user = request.user
     # get patient profile
-    try:
-        patient_profile = user.userprofile.patient_profile
-    except Exception:
-        return redirect("dashboard")
+    patient_profile = get_patient_profile(user)
+    
+    if not patient_profile:
+        return HttpResponseForbidden("Patient profile not found.")
 
     # assigned clinician fallback
     clinician = (
