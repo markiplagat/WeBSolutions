@@ -45,6 +45,12 @@
         <!-- Main heatmap -->
         <div id="main-heatmap-container" class="heatmap-container">
           <canvas id="main-heatmap" class="heatmap-canvas" width="320" height="320" aria-label="Pressure heatmap"></canvas>
+          <div id="pressure-loading" class="loading-placeholder" aria-live="polite">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <div class="loading-text">Loading pressure data…</div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line" style="max-width:160px;"></div>
+          </div>
           <div class="heatmap-timestamp" id="main-timestamp">Latest Reading</div>
         </div>
 
@@ -76,8 +82,8 @@
           <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; text-align: center;">Frame Navigation</div>
           <div class="frame-nav">
             <button id="prev-frame" class="btn btn--ghost" disabled>← Previous</button>
-            <span id="frame-counter">Frame 1 of ?</span>
-            <button id="next-frame" class="btn btn--ghost">Next →</button>
+            <span id="frame-counter">Loading…</span>
+            <button id="next-frame" class="btn btn--ghost" disabled>Next →</button>
           </div>
         </div>
       </div>
@@ -295,11 +301,24 @@ function buildThumbnail(frame, idx) {
 let currentOffset = 0;
 let totalFrames = 0;
 
+function setPressureLoading(isLoading) {
+  const loader = document.getElementById('pressure-loading');
+  const counter = document.getElementById('frame-counter');
+  if (loader) loader.style.display = isLoading ? 'flex' : 'none';
+  if (counter) counter.textContent = isLoading ? 'Loading…' : counter.textContent;
+}
+
 function loadPressureFrame(offset = 0) {
+  setPressureLoading(true);
   fetch(`/api/pressure-data/?limit=1&offset=${offset}`)
     .then(res => res.json())
     .then(data => {
-      if (!data.frames || data.frames.length === 0) return;
+      if (!data.frames || data.frames.length === 0) {
+        setPressureLoading(false);
+        const counter = document.getElementById('frame-counter');
+        if (counter) counter.textContent = 'No pressure frames available';
+        return;
+      }
 
       const frame = data.frames[0];
       currentOffset = offset;
@@ -323,18 +342,35 @@ function loadPressureFrame(offset = 0) {
       const nextBtn = document.getElementById('next-frame');
       prevBtn.disabled = offset === 0;
       nextBtn.disabled = offset >= (totalFrames - 1);
+      setPressureLoading(false);
     })
-    .catch(err => console.error('Failed to load pressure frame:', err));
+    .catch(err => {
+      console.error('Failed to load pressure frame:', err);
+      setPressureLoading(false);
+      const counter = document.getElementById('frame-counter');
+      if (counter) counter.textContent = 'Unable to load data';
+    });
 }
 
 function loadFrameCount() {
+  setPressureLoading(true);
   fetch('/api/pressure-data/?limit=1&offset=0')
     .then(res => res.json())
     .then(data => {
       if (data.frames && data.frames.length > 0) {
         totalFrames = data.total_frames || 1;
         loadPressureFrame(0);
+      } else {
+        setPressureLoading(false);
+        const counter = document.getElementById('frame-counter');
+        if (counter) counter.textContent = 'No data available';
       }
+    })
+    .catch(err => {
+      console.error('Failed to load frame count:', err);
+      setPressureLoading(false);
+      const counter = document.getElementById('frame-counter');
+      if (counter) counter.textContent = 'Unable to load data';
     });
 }
 

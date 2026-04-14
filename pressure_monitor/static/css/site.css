@@ -434,6 +434,7 @@ a{text-decoration:none;color:inherit}
   box-shadow:0 24px 60px rgba(15,23,42,.08);
 }
 .heatmap-container{
+  position:relative;
   display:flex;
   flex-direction:column;
   justify-content:center;
@@ -450,6 +451,44 @@ a{text-decoration:none;color:inherit}
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.88), 0 18px 40px rgba(15,23,42,.08);
   image-rendering: pixelated;
 }
+.loading-placeholder{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  padding:16px;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(4px);
+  border-radius:24px;
+  z-index:10;
+}
+.loading-spinner{
+  width:42px;
+  height:42px;
+  border:5px solid rgba(15,23,42,.15);
+  border-top-color:var(--brand);
+  border-radius:50%;
+  animation:spin 0.9s linear infinite;
+}
+.loading-text{
+  font-size:14px;
+  color:var(--text);
+  text-align:center;
+}
+.skeleton-line{
+  width:100%;
+  max-width:220px;
+  height:12px;
+  border-radius:999px;
+  background:linear-gradient(90deg,rgba(226,232,240,.95),rgba(241,245,249,.7),rgba(226,232,240,.95));
+  background-size:200% 100%;
+  animation:skeleton-loading 1.4s infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes skeleton-loading{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 .heatmap-timestamp{
   text-align:center;
   font-size:12px;
