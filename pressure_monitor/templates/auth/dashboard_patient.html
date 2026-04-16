@@ -135,17 +135,24 @@
       </div>
     </div>
 
-    <div class="chart">
-      <svg viewBox="0 0 600 200" preserveAspectRatio="none">
-        <!-- simple line chart -->
-        <polyline
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          points="{% for v in trend_points %}{{ forloop.counter0|add:1|floatformat:0 }},{% endfor %}"
-        />
+    <div class="chart chart--trend">
+      <svg viewBox="0 0 600 180" preserveAspectRatio="none">
+        <g class="chart-grid">
+          <line x1="0" y1="20" x2="600" y2="20" />
+          <line x1="0" y1="60" x2="600" y2="60" />
+          <line x1="0" y1="100" x2="600" y2="100" />
+          <line x1="0" y1="140" x2="600" y2="140" />
+          <line x1="0" y1="180" x2="600" y2="180" />
+        </g>
+        <polyline class="line line--peak" points="{{ trend_peak_points }}" />
+        <polyline class="line line--avg" points="{{ trend_avg_points }}" />
+        <polyline class="line line--area" points="{{ trend_area_points }}" />
       </svg>
-      <div class="chart-note">Demo chart (we’ll replace with real chart + correct scaling next step)</div>
+      <div class="chart-legend">
+        <span><span class="legend-dot legend-dot--peak"></span>Peak Pressure (mmHg)</span>
+        <span><span class="legend-dot legend-dot--avg"></span>Avg Pressure (mmHg)</span>
+        <span><span class="legend-dot legend-dot--area"></span>Contact Area (%)</span>
+      </div>
     </div>
 
     <div class="metric-row">

@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
 from core.models import (
@@ -33,9 +36,52 @@ def pressure_status(max_pressure):
     if max_pressure > 50:
         return "Elevated"
     return "Normal"
-from django.http import HttpResponseForbidden
 
-from core.models import (ClinicianProfile, Message, PatientProfile, UserRole)
+
+def build_trend_points(values, width=560, height=140, minimum=None, maximum=None):
+    if not values:
+        return ""
+    if minimum is None:
+        minimum = min(values)
+    if maximum is None:
+        maximum = max(values)
+    if minimum == maximum:
+        minimum -= 1
+        maximum += 1
+
+    count = len(values)
+    points = []
+    for idx, value in enumerate(values):
+        x = int((width * idx) / max(count - 1, 1))
+        normalized = (value - minimum) / (maximum - minimum)
+        y = int(height - (normalized * height))
+        points.append(f"{x},{y}")
+    return " ".join(points)
+
+
+def format_trend_label(dt):
+    return dt.strftime("%-I:%M %p")
+
+
+def compute_trend_series(frames, minimum=None, maximum=None):
+    peak_values = []
+    avg_values = []
+    contact_area_values = []
+
+    for frame in frames:
+        values = [float(v) for row in frame.data for v in row]
+        count = len(values)
+        peak_values.append(int(max(values)))
+        avg_values.append(int(sum(values) / count))
+        contact_area_values.append(int(sum(1 for v in values if v > 1) / count * 100))
+
+    peak_points = build_trend_points(peak_values, minimum=minimum, maximum=maximum)
+    avg_points = build_trend_points(avg_values, minimum=minimum, maximum=maximum)
+    area_points = build_trend_points(contact_area_values, minimum=0, maximum=100)
+
+    return peak_points, avg_points, area_points
+
+
 from .permissions import require_role, get_patient_profile
 
 
@@ -109,11 +155,36 @@ def patient_dashboard(request):
                     "time": latest_frame.recorded_at.strftime("%I:%M:%S %p"),
                 }
             ]
-        history_frames = device.pressure_frames.order_by("-recorded_at")[:12]
-        trend_points = [
-            int(sum(float(v) for row in frame.data for v in row) / (len(frame.data) * len(frame.data[0])))
-            for frame in reversed(history_frames)
-        ]
+        latest_time = latest_frame.recorded_at
+        ranges = {
+            "1h": timedelta(hours=1),
+            "6h": timedelta(hours=6),
+            "24h": timedelta(hours=24),
+        }
+
+        trend_series = {}
+        for label, window in ranges.items():
+            cutoff = latest_time - window
+            frames_in_window = list(
+                device.pressure_frames.filter(recorded_at__gte=cutoff).order_by("recorded_at").only("data", "recorded_at")
+            )
+            if len(frames_in_window) < 2:
+                frames_in_window = list(device.pressure_frames.order_by("-recorded_at")[: max(4, len(frames_in_window) or 4)])
+                frames_in_window.reverse()
+
+            peak_points, avg_points, area_points = compute_trend_series(
+                frames_in_window,
+                minimum=0,
+                maximum=110,
+            )
+            trend_series[f"trend_peak_points_{label}"] = peak_points
+            trend_series[f"trend_avg_points_{label}"] = avg_points
+            trend_series[f"trend_area_points_{label}"] = area_points
+
+        trend_labels = [format_trend_label(frame.recorded_at) for frame in device.pressure_frames.order_by("-recorded_at")[:12]][::-1]
+        trend_peak_points = trend_series["trend_peak_points_1h"]
+        trend_avg_points = trend_series["trend_avg_points_1h"]
+        trend_area_points = trend_series["trend_area_points_1h"]
     else:
         max_pressure = 98
         avg_pressure = 35
@@ -136,7 +207,21 @@ def patient_dashboard(request):
             [0,1,1,2,2,2,2,2,2,1,1,0],
             [0,0,1,1,1,1,1,1,1,1,0,0],
         ]
-        trend_points = [80, 70, 90, 65, 68, 88, 82, 86, 90, 100, 78, 82]
+        trend_labels = [f"T{i+1}" for i in range(12)]
+        trend_series = {
+            "trend_peak_points_1h": build_trend_points([98, 92, 95, 90, 92, 94, 100, 96, 98, 97, 95, 98], minimum=0, maximum=110),
+            "trend_avg_points_1h": build_trend_points([60, 56, 58, 55, 57, 59, 62, 61, 60, 58, 57, 59], minimum=0, maximum=110),
+            "trend_area_points_1h": build_trend_points([48, 50, 52, 49, 51, 53, 54, 52, 51, 50, 52, 53], minimum=0, maximum=100),
+            "trend_peak_points_6h": build_trend_points([92, 90, 96, 91, 94, 98, 100, 97, 95, 93, 94, 96], minimum=0, maximum=110),
+            "trend_avg_points_6h": build_trend_points([55, 54, 56, 55, 57, 58, 60, 59, 58, 57, 56, 58], minimum=0, maximum=110),
+            "trend_area_points_6h": build_trend_points([50, 48, 51, 52, 50, 49, 51, 52, 52, 50, 51, 53], minimum=0, maximum=100),
+            "trend_peak_points_24h": build_trend_points([90, 92, 96, 95, 93, 97, 99, 98, 100, 96, 94, 95], minimum=0, maximum=110),
+            "trend_avg_points_24h": build_trend_points([54, 56, 57, 56, 55, 57, 59, 58, 60, 59, 57, 58], minimum=0, maximum=110),
+            "trend_area_points_24h": build_trend_points([49, 50, 52, 51, 50, 52, 53, 52, 54, 53, 52, 51], minimum=0, maximum=100),
+        }
+        trend_peak_points = trend_series["trend_peak_points_1h"]
+        trend_avg_points = trend_series["trend_avg_points_1h"]
+        trend_area_points = trend_series["trend_area_points_1h"]
 
     context = {
         "alerts_on": True,
@@ -153,7 +238,19 @@ def patient_dashboard(request):
             "Stay hydrated and nourished",
         ],
         "grid": grid,
-        "trend_points": trend_points,
+        "trend_labels": trend_labels,
+        "trend_peak_points": trend_peak_points,
+        "trend_avg_points": trend_avg_points,
+        "trend_area_points": trend_area_points,
+        "trend_peak_points_1h": trend_series["trend_peak_points_1h"],
+        "trend_avg_points_1h": trend_series["trend_avg_points_1h"],
+        "trend_area_points_1h": trend_series["trend_area_points_1h"],
+        "trend_peak_points_6h": trend_series["trend_peak_points_6h"],
+        "trend_avg_points_6h": trend_series["trend_avg_points_6h"],
+        "trend_area_points_6h": trend_series["trend_area_points_6h"],
+        "trend_peak_points_24h": trend_series["trend_peak_points_24h"],
+        "trend_avg_points_24h": trend_series["trend_avg_points_24h"],
+        "trend_area_points_24h": trend_series["trend_area_points_24h"],
         "message_thread": message_thread,
         "clinician": clinician,
     }
