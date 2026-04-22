@@ -67,7 +67,7 @@ class PressureFrame(models.Model):
         ordering = ["-recorded_at", "frame_index"]
 
     def __str__(self):
-        return f"PressureFrame {self.device} @ {self.recorded_at:%Y-%m-%d %H:%M}"
+        return f"PressureFrame {self.device} @ {self.recorded_at:%Y-%m-%d %H:%M}" 
 
 
 class PressureReading(models.Model):
@@ -102,3 +102,4 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message [{self.pk}] {self.patient_profile.user.username} <-> {self.clinician_profile.user.username} {self.sender_role}"
+        
