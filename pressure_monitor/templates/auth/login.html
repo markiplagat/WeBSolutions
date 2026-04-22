@@ -1,79 +1,17 @@
-{% load static %}
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Login | Pressure Monitor</title>
-  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    <title>Sign Up</title>
 </head>
-<body class="auth-page">
+<body>
+    <h1>Create Account</h1>
 
-  <div class="auth-wrap">
-    <div class="auth-brand">
-      <div class="auth-logo" aria-hidden="true">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-          <path d="M3 12h4l2-6 4 12 2-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <h1>Pressure Monitor</h1>
-      <p>Real-time pressure monitoring and ulcer prevention</p>
-    </div>
-
-    <div class="auth-tabs">
-      <a class="auth-tab auth-tab--active" href="{% url 'login' %}">Login</a>
-      <a class="auth-tab" href="{% url 'signup' %}">Sign Up</a>
-    </div>
-
-    <div class="auth-card">
-      <h2>Welcome Back</h2>
-      <p class="auth-muted">Enter your credentials to access your account</p>
-
-      {% if form.errors %}
-        <div class="auth-error">Invalid credentials. Please try again.</div>
-      {% endif %}
-
-      <form method="post" class="auth-form">
+    <form method="post">
         {% csrf_token %}
-        <label>Email</label>
-        <input type="text" name="username" placeholder="email@example.com" required>
+        {{ form.as_p }}
+        <button type="submit">Sign Up</button>
+    </form>
 
-        <label>Password</label>
-        <input type="password" name="password" placeholder="••••••••" required>
-
-        <button class="auth-btn" type="submit">Sign In</button>
-      </form>
-
-      <div class="auth-demo">
-        <h3>Demo Credentials:</h3>
-        <ul>
-          <li><strong>Patient:</strong> patient@demo.com</li>
-          <li><strong>Clinician:</strong> clinician@demo.com</li>
-          <li><strong>Admin:</strong> admin@demo.com</li>
-          <li><strong>Password:</strong> demo123</li>
-        </ul>
-
-        <div class="auth-quick">
-          <span>Quick Login:</span>
-          <div class="auth-quick__buttons">
-            <form method="post" action="{% url 'demo_login' 'patient' %}">{% csrf_token %}
-              <button type="submit" class="pill">Patient</button>
-            </form>
-            <form method="post" action="{% url 'demo_login' 'clinician' %}">{% csrf_token %}
-              <button type="submit" class="pill">Clinician</button>
-            </form>
-            <form method="post" action="{% url 'demo_login' 'admin' %}">{% csrf_token %}
-              <button type="submit" class="pill">Admin</button>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <div class="auth-foot">
-        <a href="/">← Back to home</a>
-      </div>
-    </div>
-  </div>
-
+    <p>Already have an account? <a href="/accounts/login/">Log in</a></p>
 </body>
 </html>

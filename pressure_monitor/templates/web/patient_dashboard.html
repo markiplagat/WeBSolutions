@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 0;">
+    <h1>Patient Dashboard</h1>
+    <p>Welcome, {{ request.user.username }}</p>
+
+    {% if readings %}
+        {% for reading in readings %}
+            <div style="border:1px solid #ccc; padding:20px; margin-bottom:20px; background:#fff;">
+                <h3>Reading at {{ reading.recorded_at }}</h3>
+                <p><strong>Pressure value:</strong> {{ reading.pressure_value }}</p>
+                <p><strong>Peak pressure:</strong> {{ reading.peak_pressure }}</p>
+                <p><strong>Contact area:</strong> {{ reading.contact_area }}</p>
+                <p><strong>Flagged:</strong> {{ reading.is_flagged }}</p>
+
+                <h4>Add Comment</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="reading_id" value="{{ reading.id }}">
+                    {{ form.comment_text }}
+                    <br><br>
+                    <button type="submit" class="btn btn--primary">Save Comment</button>
+                </form>
+
+                <h4 style="margin-top:20px;">Comments</h4>
+                <ul>
+                    {% for comment in reading.comments.all %}
+                        <li>
+                            <strong>{{ comment.patient.user.username }}</strong>:
+                            {{ comment.comment_text }}
+                            <em>({{ comment.created_at }})</em>
+                        </li>
+                    {% empty %}
+                        <li>No comments yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No pressure readings found.</p>
+    {% endif %}
+</div>
+{% endblock %}

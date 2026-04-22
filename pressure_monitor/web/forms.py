@@ -1,41 +1,63 @@
 from django import forms
 from django.contrib.auth.models import User
-from core.models import UserProfile, UserRole, PatientProfile, ClinicianProfile
+from core.models import UserProfile, UserRole, PatientProfile, ClinicianProfile, PressureComment
 
-class SignupForm(forms.Form):
-    full_name = forms.CharField(max_length=150)
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput)
-    account_type = forms.ChoiceField(choices=UserRole.choices)
 
-    def clean_email(self):
-        email = self.cleaned_data["email"].strip().lower()
-        if User.objects.filter(username=email).exists() or User.objects.filter(email=email).exists():
-            raise forms.ValidationError("An account with this email already exists.")
-        return email
+class SignupForm(forms.ModelForm):
+    password1 = forms.CharField(widget=forms.PasswordInput, label="Password")
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
 
-    def save(self):
-        full_name = self.cleaned_data["full_name"].strip()
-        email = self.cleaned_data["email"].strip().lower()
-        password = self.cleaned_data["password"]
-        role = self.cleaned_data["account_type"]
+    role = forms.ChoiceField(choices=UserRole.choices)
 
-        first_name = full_name.split(" ")[0]
-        last_name = " ".join(full_name.split(" ")[1:]) if len(full_name.split(" ")) > 1 else ""
+    class Meta:
+        model = User
+        fields = ["username", "email", "first_name", "last_name"]
 
-        user = User.objects.create_user(
-            username=email,     #  email as username
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            self.add_error("password2", "Passwords do not match.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = User(
+            username=self.cleaned_data["username"],
+            email=self.cleaned_data["email"],
+            first_name=self.cleaned_data.get("first_name", ""),
+            last_name=self.cleaned_data.get("last_name", ""),
         )
+        user.set_password(self.cleaned_data["password1"])
 
-        UserProfile.objects.create(user=user, role=role)
+        if commit:
+            user.save()
 
-        if role == UserRole.PATIENT:
-            PatientProfile.objects.create(user=user)
-        elif role == UserRole.CLINICIAN:
-            ClinicianProfile.objects.create(user=user)
+            role = self.cleaned_data["role"]
+
+            UserProfile.objects.create(
+                user=user,
+                role=role
+            )
+
+            if role == UserRole.PATIENT:
+                PatientProfile.objects.create(user=user)
+
+            elif role == UserRole.CLINICIAN:
+                ClinicianProfile.objects.create(user=user)
 
         return user
+
+
+class PressureCommentForm(forms.ModelForm):
+    class Meta:
+        model = PressureComment
+        fields = ["comment_text"]
+        widgets = {
+            "comment_text": forms.Textarea(attrs={
+                "rows": 3,
+                "placeholder": "Add your comment about this pressure reading..."
+            })
+        }
