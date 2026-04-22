@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html>
+{% load static %}
+<!doctype html>
+<html lang="en">
 <head>
-    <title>Sign Up</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Login | Pressure Monitor</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
-<body>
-    <h1>Create Account</h1>
+<body class="auth-page">
 
   <div class="auth-wrap">
     <div class="auth-brand">
@@ -82,6 +85,5 @@
     </div>
   </div>
 
-    <p>Already have an account? <a href="/accounts/login/">Log in</a></p>
 </body>
 </html>
