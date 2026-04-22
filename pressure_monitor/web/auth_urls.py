@@ -10,8 +10,15 @@ from .views_patient import patient_dashboard
 from .views_clinician import clinician_dashboard, clinician_report
 
 urlpatterns = [
-    path("login/", auth_views.LoginView.as_view(template_name="auth/login.html"), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path(
+        "login/",
+        auth_views.LoginView.as_view(
+            template_name="auth/login.html",
+            redirect_authenticated_user=True
+        ),
+        name="login"
+    ),
+    path("logout/", auth_views.LogoutView.as_view(next_page="login"), name="logout"),
     path("signup/", signup, name="signup"),
     path("dashboard/", dashboard, name="dashboard"),
     path("dashboard/patient/", patient_dashboard, name="dashboard_patient"),

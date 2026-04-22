@@ -317,3 +317,4 @@ def get_pressure_data(request):
 
     return JsonResponse({"frames": frame_list, "total_frames": total_sections})
 
+    return render(request, "patient/dashboard.html", context)
