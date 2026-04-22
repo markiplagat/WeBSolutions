@@ -1,7 +1,13 @@
 from django import forms
 from django.contrib.auth.models import User
 from core.models import UserProfile, UserRole, PatientProfile, ClinicianProfile
+from core.models import UserProfile, UserRole, PatientProfile, ClinicianProfile
 
+class SignupForm(forms.Form):
+    full_name = forms.CharField(max_length=150)
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput)
+    account_type = forms.ChoiceField(choices=UserRole.choices)
 class SignupForm(forms.Form):
     full_name = forms.CharField(max_length=150)
     email = forms.EmailField()
