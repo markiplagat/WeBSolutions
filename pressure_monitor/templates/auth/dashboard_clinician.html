@@ -2,67 +2,92 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Clinician Dashboard</title>
-  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+ <meta charset="utf-8"/>
+ <meta name="viewport" content="width=device-width, initial-scale=1"/>
+ <title>Clinician Dashboard</title>
+ <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
 <body class="dash-page">
 <header class="dash-topbar">
-  <div class="dash-container dash-topbar__inner">
-    <div class="dash-title">
-      <div class="dash-avatar">🩺</div>
-      <div>
-        <div class="dash-title__h">Clinician Dashboard</div>
-        <div class="dash-title__sub">Respond to patient communication</div>
-      </div>
-    </div>
+ <div class="dash-container dash-topbar__inner">
+   <div class="dash-title">
+     <div class="dash-avatar">🩺</div>
+     <div>
+       <div class="dash-title__h">Clinician Dashboard</div>
+       <div class="dash-title__sub">Respond to patient communication</div>
+     </div>
+   </div>
 
-    <div class="dash-actions">
-      <a class="btn btn--primary" href="/">Home</a>
-      <form method="post" action="/accounts/logout/" style="display:inline; margin-left:.5rem;">
-        {% csrf_token %}
-        <button class="btn btn--ghost" type="submit">Log out</button>
-      </form>
-    </div>
-  </div>
+
+   <div class="dash-actions">
+     <a class="btn btn--primary" href="/">Home</a>
+     <form method="post" action="/accounts/logout/" style="display:inline; margin-left:.5rem;">
+       {% csrf_token %}
+       <button class="btn btn--ghost" type="submit">Log out</button>
+     </form>
+   </div>
+ </div>
 </header>
 
+
 <main class="dash-container dash-main">
-  <section class="cards" style="margin-top:10px; grid-template-columns:repeat(4,1fr);">
-    <div class="card"><div class="card__icon">👥</div><h4>Total Patients</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.total_patients }}</p></div>
-    <div class="card"><div class="card__icon">⚠️</div><h4>High Risk</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.high_risk }}</p></div>
-    <div class="card"><div class="card__icon">🔔</div><h4>Active Alerts</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.active_alerts }}</p></div>
-    <div class="card"><div class="card__icon">📈</div><h4>Improving</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.improving }}</p></div>
-  </section>
+ <section class="cards" style="margin-top:10px; grid-template-columns:repeat(4,1fr);">
+   <div class="card"><div class="card__icon">👥</div><h4>Total Patients</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.total_patients }}</p></div>
+   <div class="card"><div class="card__icon">⚠️</div><h4>High Risk</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.high_risk }}</p></div>
+   <div class="card"><div class="card__icon">🔔</div><h4>Active Alerts</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.active_alerts }}</p></div>
+   <div class="card"><div class="card__icon">📈</div><h4>Improving</h4><p style="font-size:1.7rem;font-weight:800;margin-top:6px;">{{ metrics.improving }}</p></div>
+ </section>
 
-  <section class="card2" style="margin-top:16px;">
-    <div class="card2__head row-between"><div><h3>Flagged Pressure Events</h3><p>Automatically detected events requiring review</p></div></div>
-    <div class="list">
-      {% for e in flagged_events %}
-        <div class="list-item"><div><div class="list-item__title">{{ e.patient }}</div><div class="list-item__sub">{{ e.time }} • Peak {{ e.peak }} • {{ e.duration }}</div></div><div style="text-align:right;"><span style="font-size:12px; font-weight:800; color:{% if e.status == 'active' %}#dc2626{% else %}#16a34a{% endif %};">{{ e.status|title }}</span><div style="margin-top:8px;"><button class="btn btn--ghost" style="font-size:12px;">View Details</button></div></div></div>
-      {% endfor %}
-    </div>
-  </section>
 
-  <section class="card2" style="margin-top:16px;">
-    <div class="row-between" style="margin-bottom:10px;"><div><h3>Patient Analysis</h3><p style="color:var(--muted); margin:2px 0;">Detailed pressure metrics and comparisons</p></div><form method="get" action="{% url 'clinician_report' %}" style="display:flex; gap:.5rem; align-items:center;"><select name="patient_id" style="padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">{% for p in assigned_patients %}<option value="{{ p.id }}" {% if p == selected_patient %}selected{% endif %}>{% if p.user.get_full_name %}{{ p.user.get_full_name }}{% else %}{{ p.user.username }}{% endif %}</option>{% endfor %}</select><button class="btn btn--primary" type="submit">Generate Report</button></form></div>
-  </section>
+ <section class="card2" style="margin-top:16px;">
+   <div class="card2__head row-between"><div><h3>Flagged Pressure Events</h3><p>Automatically detected events requiring review</p></div></div>
+   <div class="list">
+     {% for e in flagged_events %}
+       <div class="list-item"><div><div class="list-item__title">{{ e.patient }}</div><div class="list-item__sub">{{ e.time }} • Peak {{ e.peak }} • {{ e.duration }}</div></div><div style="text-align:right;"><span style="font-size:12px; font-weight:800; color:{% if e.status == 'active' %}#dc2626{% else %}#16a34a{% endif %};">{{ e.status|title }}</span><div style="margin-top:8px;"><button class="btn btn--ghost" style="font-size:12px;">View Details</button></div></div></div>
+     {% endfor %}
+   </div>
+ </section>
 
-  <section class="card2" style="margin-top:16px;">
-    <div class="card2__head"><h3>Communication</h3><p>Flag concerns and discuss pressure data with your patients</p></div>
-    {% if assigned_patients %}
-      <form method="get" style="margin-top:10px; margin-bottom:8px;"><label for="patient">Patient:</label><select id="patient" name="patient" onchange="this.form.submit()" style="margin-left:8px; padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">{% for p in assigned_patients %}<option value="{{ p.id }}" {% if p == selected_patient %}selected{% endif %}>{{ p.user.get_full_name|default:p.user.username }}</option>{% endfor %}</select></form>
-      <div class="thread" style="max-height:300px; overflow-y:auto; margin-bottom:8px;">
-        {% for m in message_thread %}
-          <div class="msg" style="margin-bottom:.65rem;"><div class="msg__avatar">{% if m.sender_role == 'CLINICIAN' %}🩺{% else %}👤{% endif %}</div><div class="msg__body"><div class="msg__meta"><strong>{% if m.sender_role == 'CLINICIAN' %}You{% else %}{{ selected_patient.user.get_full_name|default:selected_patient.user.username }}{% endif %}</strong> <span>{{ m.created_at|date:"n/j/Y, P" }}</span></div><div class="msg__text">{{ m.body }}</div></div></div>
-        {% empty %}<p>No messages yet for this patient.</p>{% endfor %}
-      </div>
-      <form method="post"><input type="hidden" name="patient_id" value="{{ selected_patient.id }}"/><div class="msg-box"><input class="msg-input" type="text" name="message" placeholder="Add a comment about pressure data..." required><button class="send-btn" type="submit">➤</button></div></form>
-    {% else %}
-      <p>You have no assigned patients yet.</p>
-    {% endif %}
-  </section>
+
+ <section class="card2" style="margin-top:16px;">
+   <div class="row-between" style="margin-bottom:10px;">
+     <div><h3>Patient Analysis</h3><p style="color:var(--muted); margin:2px 0;">Detailed pressure metrics and comparisons</p></div>
+     <form method="get" action="{% url 'clinician_report' %}" style="display:flex; gap:.5rem; align-items:center;">
+       <select name="patient_id" style="padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">
+         {% for p in assigned_patients %}
+           <option value="{{ p.id }}" {% if p == selected_patient %}selected{% endif %}>{% if p.user.get_full_name %}{{ p.user.get_full_name }}{% else %}{{ p.user.username }}{% endif %}</option>
+         {% endfor %}
+       </select>
+       <div style="position:relative; display:inline-flex; align-items:center; gap:.25rem;">
+         <button class="btn btn--primary" type="submit" name="format" value="view">Generate Report</button>
+         <details style="position:relative;">
+           <summary class="btn btn--primary" style="display:inline-flex; align-items:center; justify-content:center; padding:0 .95rem; min-height:40px; cursor:pointer;">▾</summary>
+           <div style="position:absolute; right:0; top:100%; margin-top:.35rem; min-width:180px; display:flex; flex-direction:column; background:#fff; border:1px solid rgba(15,23,42,.15); border-radius:10px; box-shadow:0 14px 40px rgba(15,23,42,.12); z-index:20;">
+             <button class="btn btn--ghost" type="submit" name="format" value="view" style="display:block; width:100%; border:none; border-bottom:1px solid rgba(15,23,42,.1); border-radius:0; padding:.85rem 1rem; text-align:left;">View</button>
+             <button class="btn btn--ghost" type="submit" name="format" value="csv" style="display:block; width:100%; border:none; border-bottom:1px solid rgba(15,23,42,.1); border-radius:0; padding:.85rem 1rem; text-align:left;">Download CSV</button>
+             <button class="btn btn--ghost" type="submit" name="format" value="pdf" style="display:block; width:100%; border:none; border-radius:0 0 10px 10px; padding:.85rem 1rem; text-align:left;">Download PDF</button>
+           </div>
+         </details>
+       </div>
+     </form>
+   </div>
+ </section>
+
+
+ <section class="card2" style="margin-top:16px;">
+   <div class="card2__head"><h3>Communication</h3><p>Flag concerns and discuss pressure data with your patients</p></div>
+   {% if assigned_patients %}
+     <form method="get" style="margin-top:10px; margin-bottom:8px;"><label for="patient">Patient:</label><select id="patient" name="patient" onchange="this.form.submit()" style="margin-left:8px; padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">{% for p in assigned_patients %}<option value="{{ p.id }}" {% if p == selected_patient %}selected{% endif %}>{{ p.user.get_full_name|default:p.user.username }}</option>{% endfor %}</select></form>
+     <div class="thread" style="max-height:300px; overflow-y:auto; margin-bottom:8px;">
+       {% for m in message_thread %}
+         <div class="msg" style="margin-bottom:.65rem;"><div class="msg__avatar">{% if m.sender_role == 'CLINICIAN' %}🩺{% else %}👤{% endif %}</div><div class="msg__body"><div class="msg__meta"><strong>{% if m.sender_role == 'CLINICIAN' %}You{% else %}{{ selected_patient.user.get_full_name|default:selected_patient.user.username }}{% endif %}</strong> <span>{{ m.created_at|date:"n/j/Y, P" }}</span></div><div class="msg__text">{{ m.body }}</div></div></div>
+       {% empty %}<p>No messages yet for this patient.</p>{% endfor %}
+     </div>
+     <form method="post"><input type="hidden" name="patient_id" value="{{ selected_patient.id }}"/><div class="msg-box"><input class="msg-input" type="text" name="message" placeholder="Add a comment about pressure data..." required><button class="send-btn" type="submit">➤</button></div></form>
+   {% else %}
+     <p>You have no assigned patients yet.</p>
+   {% endif %}
+ </section>
 </main>
 </body>
 </html>
