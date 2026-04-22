@@ -17,9 +17,16 @@
         <a href="#why">Why choose us</a>
       </nav>
       <div class="topbar__actions">
-        <a class="btn btn--ghost" href="/accounts/login">Log in</a>
-        <a class="btn btn--primary" href="/accounts/signup">Get Started</a>
-      </div>
+  {% if user.is_authenticated %}
+    <span style="color: white; margin-right: 10px;">
+      Hi, {{ user.username }}
+    </span>
+    <a class="btn btn--ghost" href="/accounts/logout">Logout</a>
+  {% else %}
+    <a class="btn btn--ghost" href="/accounts/login">Log in</a>
+    <a class="btn btn--primary" href="/accounts/signup">Get Started</a>
+  {% endif %}
+</div>
     </div>
   </header>
 

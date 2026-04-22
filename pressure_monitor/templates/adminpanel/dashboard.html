@@ -1,0 +1,133 @@
+
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body class="dash-page">
+
+<header class="dash-topbar">
+  <div class="dash-container dash-topbar__inner">
+    <div class="dash-title">
+      <div class="dash-avatar">🛡️</div>
+      <div>
+        <div class="dash-title__h">Administrator Dashboard</div>
+        <div class="dash-title__sub">Manage users, assignments, devices and alerts</div>
+      </div>
+    </div>
+
+    <div class="dash-actions">
+      <a class="toggle" href="/admin/">Django Admin</a>
+      <a class="link" href="{% url 'logout' %}">Logout</a>
+    </div>
+  </div>
+</header>
+
+<main class="dash-container dash-main">
+
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card__label">Total Patients</div>
+      <div class="stat-card__value">{{ stats.patients }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Total Clinicians</div>
+      <div class="stat-card__value">{{ stats.clinicians }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Registered Devices</div>
+      <div class="stat-card__value">{{ stats.devices }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Active Alerts</div>
+      <div class="stat-card__value stat-card__value--bad">{{ stats.active_alerts }}</div>
+    </div>
+  </section>
+
+  <section class="grid2" style="margin-top:16px;">
+    <div class="card2">
+      <div class="card2__head">
+        <h3>Recent Alerts</h3>
+        <p>Monitor the latest system pressure events</p>
+      </div>
+
+      <div class="table-like">
+        {% for alert in recent_alerts %}
+          <div class="table-row">
+            <div>
+              <strong>{{ alert.patient }}</strong>
+              <div class="muted-mini">{{ alert.type }}</div>
+            </div>
+            <div>
+              <span class="severity severity--{{ alert.severity|lower }}">{{ alert.severity }}</span>
+            </div>
+            <div class="muted-mini">{{ alert.time }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card2">
+      <div class="card2__head">
+        <h3>Quick Actions</h3>
+        <p>Administrative shortcuts</p>
+      </div>
+
+      <div class="quick-actions">
+        <a class="quick-btn" href="/admin/auth/user/">Manage Users</a>
+        <a class="quick-btn" href="/admin/core/clinicianpatientassignment/">Assignments</a>
+        <a class="quick-btn" href="/admin/core/device/">Devices</a>
+        <a class="quick-btn" href="/admin/core/alert/">Alerts</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid2" style="margin-top:16px;">
+    <div class="card2">
+      <div class="card2__head">
+        <h3>Recent Users</h3>
+        <p>Latest registered accounts</p>
+      </div>
+
+      <div class="table-like">
+        {% for user in recent_users %}
+          <div class="table-row">
+            <div>
+              <strong>{{ user.name }}</strong>
+            </div>
+            <div class="muted-mini">{{ user.role }}</div>
+            <div>
+              <span class="status-pill">{{ user.status }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card2">
+      <div class="card2__head">
+        <h3>Clinician Assignments</h3>
+        <p>Current clinician-to-patient allocation</p>
+      </div>
+
+      <div class="table-like">
+        {% for item in assignments %}
+          <div class="table-row">
+            <div>
+              <strong>{{ item.clinician }}</strong>
+            </div>
+            <div class="muted-mini">→</div>
+            <div>{{ item.patient }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

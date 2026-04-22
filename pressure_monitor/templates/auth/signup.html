@@ -1,13 +1,10 @@
-{% load static %}
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Sign Up | Pressure Monitor</title>
-  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    <title>Sign Up</title>
 </head>
-<body class="auth-page">
+<body>
+    <h1>Create Account</h1>
 
   <div class="auth-wrap">
     <div class="auth-brand">
@@ -44,22 +41,7 @@
 
       <form method="post" class="auth-form">
         {% csrf_token %}
-
-        <label>Full Name</label>
-        <input type="text" name="full_name" placeholder="John Smith" value="{{ form.full_name.value|default:'' }}" required>
-
-        <label>Email</label>
-        <input type="email" name="email" placeholder="email@example.com" value="{{ form.email.value|default:'' }}" required>
-
-        <label>Password</label>
-        <input type="password" name="password" placeholder="••••••••" required>
-
-        <label>Account Type</label>
-        <select name="account_type" required>
-          <option value="PATIENT" {% if form.account_type.value == "PATIENT" %}selected{% endif %}>Patient</option>
-          <option value="CLINICIAN" {% if form.account_type.value == "CLINICIAN" %}selected{% endif %}>Clinician</option>
-        </select>
-
+        {{ form.as_p }}
         <button class="auth-btn" type="submit">Create Account</button>
       </form>
 
@@ -69,5 +51,6 @@
     </div>
   </div>
 
+    <p>Already have an account? <a href="/accounts/login/">Log in</a></p>
 </body>
 </html>
