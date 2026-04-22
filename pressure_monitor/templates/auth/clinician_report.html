@@ -1,0 +1,62 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"/>
+ <meta name="viewport" content="width=device-width, initial-scale=1"/>
+ <title>Clinician Report</title>
+ <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body class="dash-page">
+<header class="dash-topbar">
+ <div class="dash-container dash-topbar__inner">
+   <div class="dash-title">
+     <div class="dash-avatar">🩺</div>
+     <div>
+       <div class="dash-title__h">Clinician Report</div>
+       <div class="dash-title__sub">Pressure summary for {{ report.patient_name }}</div>
+     </div>
+   </div>
+   <div class="dash-actions">
+     <a class="btn btn--ghost" href="{% url 'dashboard_clinician' %}?patient={{ selected_patient.id }}">Back to dashboard</a>
+     <form method="post" action="/accounts/logout/" style="display:inline; margin-left:.5rem;">
+       {% csrf_token %}
+       <button class="btn btn--ghost" type="submit">Log out</button>
+     </form>
+   </div>
+ </div>
+</header>
+<main class="dash-container dash-main">
+ <section class="card2" style="margin-top:16px;">
+   <div class="card2__head row-between">
+     <div>
+       <h3>Summary</h3>
+       <p>Generated: {{ report.generated_at|date:'n/j/Y, P' }}</p>
+     </div>
+   </div>
+   <div class="metric-row">
+     <div class="metric-mini"><strong>Patient</strong><p>{{ report.patient_name }}</p></div>
+     <div class="metric-mini"><strong>Risk Level</strong><p>{{ report.risk }}</p></div>
+     <div class="metric-mini"><strong>Latest Peak</strong><p>{{ report.current_peak }} mmHg</p></div>
+     <div class="metric-mini"><strong>Latest Average</strong><p>{{ report.average }} mmHg</p></div>
+   </div>
+   <div class="metric-row" style="margin-top:1rem;">
+     <div class="metric-mini"><strong>Contact Area</strong><p>{{ report.contact_area }}%</p></div>
+     <div class="metric-mini"><strong>Frames Recorded</strong><p>{{ report.frame_count }}</p></div>
+     <div class="metric-mini"><strong>High Risk Frames</strong><p>{{ report.high_risk_frames }}</p></div>
+     <div class="metric-mini"><strong>Critical Frames</strong><p>{{ report.critical_frames }}</p></div>
+   </div>
+ </section>
+
+
+ <section class="card2" style="margin-top:16px;">
+   <div class="card2__head"><h3>Analysis</h3><p>Recent pressure metrics and patient trends based on available frame history.</p></div>
+   <div class="list">
+     <div class="list-item"><div><div class="list-item__title">Average peak pressure</div><div class="list-item__sub">{{ report.average_peak }} mmHg across recorded frames</div></div></div>
+     <div class="list-item"><div><div class="list-item__title">Latest measurement</div><div class="list-item__sub">{% if report.latest_recorded_at %}{{ report.latest_recorded_at|date:'n/j/Y, P' }}{% else %}No readings yet{% endif %}</div></div></div>
+     <div class="list-item"><div><div class="list-item__title">Body contact area</div><div class="list-item__sub">{{ report.contact_area }}% of active pressure cells</div></div></div>
+   </div>
+ </section>
+</main>
+</body>
+</html>

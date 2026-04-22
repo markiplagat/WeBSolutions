@@ -46,8 +46,7 @@
   </section>
 
   <section class="card2" style="margin-top:16px;">
-    <div class="row-between" style="margin-bottom:10px;"><div><h3>Patient Analysis</h3><p style="color:var(--muted); margin:2px 0;">Detailed pressure metrics and comparisons</p></div><div style="display:flex; gap:.5rem; align-items:center;"><select style="padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">{% for p in assigned_patients %}<option>{% if p.user.get_full_name %}{{ p.user.get_full_name }}{% else %}{{ p.user.username }}{% endif %}</option>{% endfor %}</select><button class="btn btn--primary">Generate Report</button></div></div>
-    <div class="metric-row"><div class="metric-mini"><strong>Risk Level</strong><p>{{ analysis.risk }}</p></div><div class="metric-mini"><strong>Current Peak</strong><p>{{ analysis.current_peak }} mmHg</p></div><div class="metric-mini"><strong>Average</strong><p>{{ analysis.average }} mmHg</p></div><div class="metric-mini"><strong>Last Alert</strong><p>{{ analysis.last_alert }}</p></div></div>
+    <div class="row-between" style="margin-bottom:10px;"><div><h3>Patient Analysis</h3><p style="color:var(--muted); margin:2px 0;">Detailed pressure metrics and comparisons</p></div><form method="get" action="{% url 'clinician_report' %}" style="display:flex; gap:.5rem; align-items:center;"><select name="patient_id" style="padding:.45rem; border-radius:8px; border:1px solid rgba(15,23,42,.1);">{% for p in assigned_patients %}<option value="{{ p.id }}" {% if p == selected_patient %}selected{% endif %}>{% if p.user.get_full_name %}{{ p.user.get_full_name }}{% else %}{{ p.user.username }}{% endif %}</option>{% endfor %}</select><button class="btn btn--primary" type="submit">Generate Report</button></form></div>
   </section>
 
   <section class="card2" style="margin-top:16px;">
