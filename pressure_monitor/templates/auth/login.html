@@ -44,9 +44,6 @@
 
       <form method="post" class="auth-form">
         {% csrf_token %}
-        <input type="hidden" name="next" value="{{ next }}">
-        <label>Email</label>
-        <input type="text" name="username" placeholder="email@example.com" value="{{ form.email.value }}" required>
 
         <label for="id_username">Email Address</label>
         <input
@@ -107,7 +104,7 @@
   </div>
 
       <div class="auth-demo">
-        <h3>Demo Credentials:</h3>
+        <h3>Demo Accounts</h3>
         <ul>
           <li><strong>Patient:</strong> patient@demo.com</li>
           <li><strong>Clinician:</strong> clinician@demo.com</li>
@@ -116,16 +113,19 @@
         </ul>
 
         <div class="auth-quick">
-          <span>Quick Login:</span>
+          <span>Quick Demo Access:</span>
           <div class="auth-quick__buttons">
-            <form method="post" action="{% url 'demo_login' 'patient' %}">{% csrf_token %}
-              <button type="submit" class="pill">Patient</button>
+            <form method="post" action="{% url 'demo_login' 'patient' %}">
+              {% csrf_token %}
+              <button type="submit" class="pill">Login as Patient</button>
             </form>
-            <form method="post" action="{% url 'demo_login' 'clinician' %}">{% csrf_token %}
-              <button type="submit" class="pill">Clinician</button>
+            <form method="post" action="{% url 'demo_login' 'clinician' %}">
+              {% csrf_token %}
+              <button type="submit" class="pill">Login as Clinician</button>
             </form>
-            <form method="post" action="{% url 'demo_login' 'admin' %}">{% csrf_token %}
-              <button type="submit" class="pill">Admin</button>
+            <form method="post" action="{% url 'demo_login' 'admin' %}">
+              {% csrf_token %}
+              <button type="submit" class="pill">Login as Admin</button>
             </form>
           </div>
         </div>
@@ -139,4 +139,3 @@
 
 </body>
 </html>
-
