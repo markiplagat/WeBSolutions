@@ -1,7 +1,14 @@
 {% load static %}
 <!doctype html>
 <html lang="en">
+{% load static %}
+<!doctype html>
+<html lang="en">
 <head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Login | Pressure Monitor</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Login | Pressure Monitor</title>
@@ -85,5 +92,37 @@
     </div>
   </div>
 
+      <div class="auth-demo">
+        <h3>Demo Credentials:</h3>
+        <ul>
+          <li><strong>Patient:</strong> patient@demo.com</li>
+          <li><strong>Clinician:</strong> clinician@demo.com</li>
+          <li><strong>Admin:</strong> admin@demo.com</li>
+          <li><strong>Password:</strong> demo123</li>
+        </ul>
+
+        <div class="auth-quick">
+          <span>Quick Login:</span>
+          <div class="auth-quick__buttons">
+            <form method="post" action="{% url 'demo_login' 'patient' %}">{% csrf_token %}
+              <button type="submit" class="pill">Patient</button>
+            </form>
+            <form method="post" action="{% url 'demo_login' 'clinician' %}">{% csrf_token %}
+              <button type="submit" class="pill">Clinician</button>
+            </form>
+            <form method="post" action="{% url 'demo_login' 'admin' %}">{% csrf_token %}
+              <button type="submit" class="pill">Admin</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-foot">
+        <a href="/">← Back to home</a>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
+
