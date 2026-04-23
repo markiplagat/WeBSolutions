@@ -1,0 +1,339 @@
+{% comment %}
+  Reusable patient-facing metrics explainer.
+  Include this in any template with:
+      {% include 'pressure/partials/metrics_explainer.html' with frame=frame %}
+  Requires: frame.peak_pressure_index, frame.contact_area_percent, frame.is_alert
+{% endcomment %}
+
+{% if user.is_patient or user.is_clinician or user.is_admin_user %}
+<div class="metrics-explainer mt-3">
+
+  <!-- ── Section heading ── -->
+  <div class="explainer-heading">
+    <i class="bi bi-lightbulb-fill me-2" style="color:#f59e0b"></i>
+    <span>What do these numbers mean?</span>
+    <button class="explainer-toggle" id="toggle-explainer" onclick="toggleExplainer()" title="Show / hide explanation">
+      <i class="bi bi-chevron-down" id="toggle-icon"></i>
+    </button>
+  </div>
+
+  <div id="explainer-body">
+
+    <!-- ── Peak Pressure Index ── -->
+    <div class="explainer-card {% if frame.peak_pressure_index > 3000 %}state-danger{% elif frame.peak_pressure_index > 2000 %}state-warning{% else %}state-good{% endif %}">
+
+      <div class="explainer-card-header">
+        <div class="explainer-icon">
+          {% if frame.peak_pressure_index > 3000 %}🔴
+          {% elif frame.peak_pressure_index > 2000 %}🟡
+          {% else %}🟢{% endif %}
+        </div>
+        <div>
+          <div class="explainer-title">Peak Pressure Index (PPI)</div>
+          <div class="explainer-value">
+            {{ frame.peak_pressure_index|floatformat:0|default:"—" }}
+            <span class="explainer-unit">out of 4,095</span>
+          </div>
+        </div>
+        <div class="explainer-badge ms-auto
+          {% if frame.peak_pressure_index > 3000 %}badge-danger
+          {% elif frame.peak_pressure_index > 2000 %}badge-warning
+          {% else %}badge-good{% endif %}">
+          {% if frame.peak_pressure_index > 3000 %}High
+          {% elif frame.peak_pressure_index > 2000 %}Moderate
+          {% else %}Good{% endif %}
+        </div>
+      </div>
+
+      <!-- Visual gauge -->
+      <div class="gauge-wrap">
+        <div class="gauge-track">
+          <div class="gauge-fill
+            {% if frame.peak_pressure_index > 3000 %}gauge-danger
+            {% elif frame.peak_pressure_index > 2000 %}gauge-warning
+            {% else %}gauge-good{% endif %}"
+            style="width: {% widthratio frame.peak_pressure_index|default:0 4095 100 %}%">
+          </div>
+          <div class="gauge-marker" style="left:73.2%">
+            <span class="gauge-marker-label">Alert threshold</span>
+          </div>
+        </div>
+        <div class="gauge-labels">
+          <span>0 — No pressure</span>
+          <span>4,095 — Maximum</span>
+        </div>
+      </div>
+
+      <!-- Plain-English explanation -->
+      <div class="explainer-what">
+        <strong>What it is:</strong>
+        The highest pressure recorded at any single point on the mat during this reading,
+        but only in areas where at least 10 sensor cells are active (to filter out noise).
+        Think of it like the hottest spot on a thermal camera image of your seat.
+      </div>
+
+      <div class="explainer-means mt-2">
+        <strong>What it means for you:</strong>
+        {% if frame.peak_pressure_index > 3000 %}
+          <span class="text-danger">
+            Your reading of <strong>{{ frame.peak_pressure_index|floatformat:0 }}</strong> is in the
+            <strong>high risk zone</strong>. One area of your body is bearing too much weight on the mat.
+            This kind of sustained pressure can reduce blood flow to the skin, which over time can cause
+            a pressure ulcer (also called a bedsore). You should reposition yourself now.
+          </span>
+        {% elif frame.peak_pressure_index > 2000 %}
+          <span class="text-warning" style="color:#92400e!important">
+            Your reading of <strong>{{ frame.peak_pressure_index|floatformat:0 }}</strong> is
+            <strong>moderately elevated</strong>. Pressure is building in one spot. You do not need to
+            act immediately, but try to shift your weight slightly within the next few minutes.
+          </span>
+        {% else %}
+          <span class="text-success">
+            Your reading of <strong>{{ frame.peak_pressure_index|floatformat:0 }}</strong> is
+            in the <strong>normal range</strong>. Your weight is well distributed and there are no
+            areas of concern right now. Keep up your regular repositioning routine.
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- What should I do -->
+      <div class="explainer-action mt-2">
+        <div class="action-label"><i class="bi bi-arrow-right-circle-fill me-1"></i>What should I do?</div>
+        {% if frame.peak_pressure_index > 3000 %}
+          <ul class="action-list">
+            <li>Lean to your left or right side for 30–60 seconds to shift the pressure</li>
+            <li>Tilt your chair back slightly if possible</li>
+            <li>Try a forward lean — place your hands on your knees and lean forward</li>
+            <li>If the alert keeps appearing, contact your clinician</li>
+          </ul>
+        {% elif frame.peak_pressure_index > 2000 %}
+          <ul class="action-list">
+            <li>Do a small weight shift — lean slightly to one side</li>
+            <li>Make sure you are sitting centrally on the mat</li>
+            <li>Plan your next full repositioning within the next 15–20 minutes</li>
+          </ul>
+        {% else %}
+          <ul class="action-list">
+            <li>Continue your regular repositioning every 15–30 minutes</li>
+            <li>Keep monitoring — pressure can build gradually</li>
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── Contact Area ── -->
+    <div class="explainer-card {% if frame.contact_area_percent < 20 %}state-warning{% elif frame.contact_area_percent > 75 %}state-info{% else %}state-good{% endif %} mt-3">
+
+      <div class="explainer-card-header">
+        <div class="explainer-icon">
+          {% if frame.contact_area_percent < 20 %}🟡
+          {% elif frame.contact_area_percent > 75 %}🔵
+          {% else %}🟢{% endif %}
+        </div>
+        <div>
+          <div class="explainer-title">Seat Contact Area</div>
+          <div class="explainer-value">
+            {{ frame.contact_area_percent|floatformat:1|default:"—" }}
+            <span class="explainer-unit">% of mat covered</span>
+          </div>
+        </div>
+        <div class="explainer-badge ms-auto
+          {% if frame.contact_area_percent < 20 %}badge-warning
+          {% elif frame.contact_area_percent > 75 %}badge-info
+          {% else %}badge-good{% endif %}">
+          {% if frame.contact_area_percent < 20 %}Low
+          {% elif frame.contact_area_percent > 75 %}Wide
+          {% else %}Normal{% endif %}
+        </div>
+      </div>
+
+      <!-- Visual gauge -->
+      <div class="gauge-wrap">
+        <div class="gauge-track">
+          <div class="gauge-fill
+            {% if frame.contact_area_percent < 20 %}gauge-warning
+            {% elif frame.contact_area_percent > 75 %}gauge-info
+            {% else %}gauge-good{% endif %}"
+            style="width: {{ frame.contact_area_percent|default:0|floatformat:0 }}%">
+          </div>
+        </div>
+        <div class="gauge-labels">
+          <span>0% — Not seated</span>
+          <span>50% — Half mat</span>
+          <span>100% — Full mat</span>
+        </div>
+      </div>
+
+      <div class="explainer-what mt-2">
+        <strong>What it is:</strong>
+        The percentage of the sensor mat that your body is actually touching.
+        Imagine the mat as a grid of 1,024 tiny squares — this number tells you
+        how many of those squares have any weight on them.
+        A higher percentage generally means your weight is spread more evenly.
+      </div>
+
+      <div class="explainer-means mt-2">
+        <strong>What it means for you:</strong>
+        {% if frame.contact_area_percent < 20 %}
+          <span style="color:#92400e">
+            Only <strong>{{ frame.contact_area_percent|floatformat:1 }}%</strong> of the mat is in contact.
+            This is <strong>unusually low</strong>, which often means your weight is concentrated in a very
+            small area — like just your tailbone or one side. This can be uncomfortable and increases
+            pressure ulcer risk even if the PPI looks acceptable.
+          </span>
+        {% elif frame.contact_area_percent > 75 %}
+          <span style="color:#1e40af">
+            <strong>{{ frame.contact_area_percent|floatformat:1 }}%</strong> of the mat is in contact.
+            This is a <strong>wide spread</strong>, meaning your weight is distributed across a large area.
+            This is generally positive, though very high values can sometimes indicate slouching or
+            an unusual posture — worth checking with your clinician.
+          </span>
+        {% else %}
+          <span class="text-success">
+            <strong>{{ frame.contact_area_percent|floatformat:1 }}%</strong> of the mat is in contact.
+            This is a <strong>normal, healthy range</strong>. Your weight is distributed over a good
+            portion of the seat surface, which helps prevent pressure concentrating in one spot.
+          </span>
+        {% endif %}
+      </div>
+
+      <div class="explainer-action mt-2">
+        <div class="action-label"><i class="bi bi-arrow-right-circle-fill me-1"></i>What should I do?</div>
+        {% if frame.contact_area_percent < 20 %}
+          <ul class="action-list">
+            <li>Check your sitting posture — are you perched on one side?</li>
+            <li>Try to sit back into the seat so more of your thighs are on the mat</li>
+            <li>Mention this pattern to your clinician at your next review</li>
+          </ul>
+        {% elif frame.contact_area_percent > 75 %}
+          <ul class="action-list">
+            <li>Check you are sitting upright and not slouching</li>
+            <li>Ask your clinician to review your seating position at your next appointment</li>
+          </ul>
+        {% else %}
+          <ul class="action-list">
+            <li>Your seating position looks good — keep it up</li>
+            <li>Continue repositioning regularly as advised by your clinician</li>
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── Overall summary ── -->
+    <div class="explainer-summary mt-3
+      {% if frame.is_alert %}summary-danger
+      {% elif frame.peak_pressure_index > 2000 or frame.contact_area_percent < 20 %}summary-warning
+      {% else %}summary-good{% endif %}">
+      <div class="summary-emoji">
+        {% if frame.is_alert %}⚠️
+        {% elif frame.peak_pressure_index > 2000 or frame.contact_area_percent < 20 %}📊
+        {% else %}✅{% endif %}
+      </div>
+      <div>
+        <strong>Overall:</strong>
+        {% if frame.is_alert %}
+          High pressure is detected. Please reposition now and check back in 2–3 minutes
+          to see if it improves. If it does not, contact your clinician.
+        {% elif frame.peak_pressure_index > 2000 or frame.contact_area_percent < 20 %}
+          Your readings need attention. No immediate danger, but a small posture adjustment
+          now will help prevent problems later.
+        {% else %}
+          Everything looks good in this reading. Keep up your repositioning routine and
+          continue monitoring regularly.
+        {% endif %}
+      </div>
+    </div>
+
+  </div><!-- #explainer-body -->
+</div><!-- .metrics-explainer -->
+
+<style>
+  .metrics-explainer { font-size: 0.88rem; }
+  .explainer-heading {
+    display: flex; align-items: center; gap: 6px;
+    font-weight: 600; font-size: 0.95rem;
+    color: #374151; margin-bottom: 0.75rem;
+  }
+  .explainer-toggle {
+    background: none; border: 1px solid #e5e7eb;
+    border-radius: 6px; padding: 2px 8px;
+    cursor: pointer; margin-left: auto; color: #6b7280;
+    transition: background 0.2s;
+  }
+  .explainer-toggle:hover { background: #f3f4f6; }
+  .explainer-card {
+    border-radius: 10px; padding: 1rem 1.1rem;
+    border: 1px solid #e5e7eb; background: #fff;
+  }
+  .explainer-card.state-danger  { border-color: #fca5a5; background: #fff8f8; }
+  .explainer-card.state-warning { border-color: #fcd34d; background: #fffdf0; }
+  .explainer-card.state-good    { border-color: #86efac; background: #f7fef9; }
+  .explainer-card.state-info    { border-color: #93c5fd; background: #f0f7ff; }
+  .explainer-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.65rem; }
+  .explainer-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+  .explainer-title { font-weight: 600; font-size: 0.88rem; color: #374151; }
+  .explainer-value { font-size: 1.5rem; font-weight: 700; color: #111827; line-height: 1.1; }
+  .explainer-unit  { font-size: 0.75rem; font-weight: 400; color: #6b7280; }
+  .explainer-badge {
+    font-size: 0.72rem; font-weight: 600; border-radius: 20px;
+    padding: 3px 10px; white-space: nowrap;
+  }
+  .badge-danger  { background: #fee2e2; color: #dc2626; }
+  .badge-warning { background: #fef9c3; color: #92400e; }
+  .badge-good    { background: #dcfce7; color: #166534; }
+  .badge-info    { background: #dbeafe; color: #1e40af; }
+  .gauge-wrap { margin: 0.5rem 0; }
+  .gauge-track {
+    position: relative; height: 10px;
+    background: #e5e7eb; border-radius: 20px; overflow: visible;
+  }
+  .gauge-fill {
+    height: 100%; border-radius: 20px;
+    transition: width 0.6s ease; max-width: 100%;
+  }
+  .gauge-good    { background: #22c55e; }
+  .gauge-warning { background: #f59e0b; }
+  .gauge-danger  { background: #ef4444; }
+  .gauge-info    { background: #3b82f6; }
+  .gauge-marker {
+    position: absolute; top: -3px; height: 16px;
+    width: 2px; background: #374151; opacity: 0.5;
+  }
+  .gauge-marker-label {
+    position: absolute; top: -18px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px; color: #6b7280; white-space: nowrap;
+  }
+  .gauge-labels {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: #9ca3af; margin-top: 3px;
+  }
+  .explainer-what, .explainer-means {
+    color: #4b5563; line-height: 1.6;
+    padding: 0.5rem 0.65rem;
+    background: rgba(0,0,0,0.02); border-radius: 6px;
+  }
+  .explainer-action { padding: 0.5rem 0.65rem; background: rgba(0,0,0,0.02); border-radius: 6px; }
+  .action-label { font-weight: 600; color: #374151; margin-bottom: 0.35rem; }
+  .action-list { margin: 0; padding-left: 1.2rem; color: #4b5563; line-height: 1.9; }
+  .explainer-summary {
+    display: flex; align-items: flex-start; gap: 10px;
+    border-radius: 10px; padding: 0.85rem 1rem;
+    border: 1px solid #e5e7eb; line-height: 1.55; color: #374151;
+  }
+  .explainer-summary.summary-danger  { background: #fef2f2; border-color: #fca5a5; }
+  .explainer-summary.summary-warning { background: #fffbeb; border-color: #fcd34d; }
+  .explainer-summary.summary-good    { background: #f0fdf4; border-color: #86efac; }
+  .summary-emoji { font-size: 1.3rem; flex-shrink: 0; line-height: 1.2; }
+</style>
+
+<script>
+function toggleExplainer() {
+  const body = document.getElementById('explainer-body');
+  const icon = document.getElementById('toggle-icon');
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? 'block' : 'none';
+  icon.className = hidden ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+}
+</script>
+{% endif %}
