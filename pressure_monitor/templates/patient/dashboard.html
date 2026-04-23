@@ -70,11 +70,9 @@
 
         <!-- Thumbnail gallery -->
         <div class="thumbnail-gallery">
-          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; text-align: center;">Frame Navigation</div>
+          <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px; text-align: center;">Latest frame will advance automatically every 2 minutes</div>
           <div class="frame-nav">
-            <button id="prev-frame" class="btn btn--ghost" disabled>← Previous</button>
-            <span id="frame-counter">Frame 1 of ?</span>
-            <button id="next-frame" class="btn btn--ghost">Next →</button>
+            <span id="frame-counter">Loading…</span>
           </div>
         </div>
       </div>
@@ -306,6 +304,7 @@ function buildThumbnail(frame, idx) {
 
 let currentOffset = 0;
 let totalFrames = 0;
+let autoAdvanceTimer = null;
 
 function loadPressureFrame(offset = 0) {
   fetch(`/api/pressure-data/?limit=1&offset=${offset}`)
@@ -327,14 +326,8 @@ function loadPressureFrame(offset = 0) {
 
       document.getElementById('main-timestamp').textContent = formatTimestamp(frame.recorded_at);
 
-      // Update navigation
       const counter = document.getElementById('frame-counter');
-      counter.textContent = `Frame ${offset + 1} of ${totalFrames || '?'}`;
-
-      const prevBtn = document.getElementById('prev-frame');
-      const nextBtn = document.getElementById('next-frame');
-      prevBtn.disabled = offset === 0;
-      nextBtn.disabled = offset >= (totalFrames - 1);
+      if (counter) counter.textContent = `Frame ${offset + 1} of ${totalFrames || '?'}`;
     })
     .catch(err => console.error('Failed to load pressure frame:', err));
 }
@@ -346,29 +339,26 @@ function loadFrameCount() {
       if (data.frames && data.frames.length > 0) {
         totalFrames = data.total_frames || 1;
         loadPressureFrame(0);
+        startAutoAdvance();
       }
     });
 }
 
-function initNavigation() {
-  document.getElementById('prev-frame').onclick = () => {
-    if (currentOffset > 0) {
-      loadPressureFrame(currentOffset - 1);
-    }
-  };
-  document.getElementById('next-frame').onclick = () => {
-    loadPressureFrame(currentOffset + 1);
-  };
+function advanceFrame() {
+  if (totalFrames === 0) return;
+  const nextOffset = currentOffset >= totalFrames - 1 ? 0 : currentOffset + 1;
+  loadPressureFrame(nextOffset);
+}
+
+function startAutoAdvance() {
+  if (autoAdvanceTimer !== null) return;
+  autoAdvanceTimer = setInterval(advanceFrame, 120000);
 }
 
 // Load on page ready
 document.addEventListener('DOMContentLoaded', () => {
-  initNavigation();
   loadFrameCount();
 });
-
-// Auto-refresh every 20 seconds - disabled for now since single frame
-// setInterval(() => loadPressureFrame(currentOffset), 20000);
 </script>
 
 </body>
