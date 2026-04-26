@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pressure Monitoring</title>
+</head>
+
+<body>
+
+<h1>Patient Pressure Monitoring System</h1>
+
+<h2>Current Pressure: {{ pressure }}</h2>
+
+{% if alert %}
+<h3 style="color:red">{{ alert }}</h3>
+{% else %}
+<h3 style="color:green">Pressure Normal</h3>
+{% endif %}
+
+<br>
+<a href="/">Check Again</a>
+
+</body>
+</html>
