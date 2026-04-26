@@ -83,7 +83,7 @@
          <div class="msg" style="margin-bottom:.65rem;"><div class="msg__avatar">{% if m.sender_role == 'CLINICIAN' %}🩺{% else %}👤{% endif %}</div><div class="msg__body"><div class="msg__meta"><strong>{% if m.sender_role == 'CLINICIAN' %}You{% else %}{{ selected_patient.user.get_full_name|default:selected_patient.user.username }}{% endif %}</strong> <span>{{ m.created_at|date:"n/j/Y, P" }}</span></div><div class="msg__text">{{ m.body }}</div></div></div>
        {% empty %}<p>No messages yet for this patient.</p>{% endfor %}
      </div>
-     <form method="post"><input type="hidden" name="patient_id" value="{{ selected_patient.id }}"/><div class="msg-box"><input class="msg-input" type="text" name="message" placeholder="Add a comment about pressure data..." required><button class="send-btn" type="submit">➤</button></div></form>
+     <form method="post">{% csrf_token %}<input type="hidden" name="patient_id" value="{{ selected_patient.id }}"/><div class="msg-box"><input class="msg-input" type="text" name="message" placeholder="Add a comment about pressure data..." required><button class="send-btn" type="submit">➤</button></div></form>
    {% else %}
      <p>You have no assigned patients yet.</p>
    {% endif %}

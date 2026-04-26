@@ -11,6 +11,8 @@ from .permissions import require_role
 
 
 def _dashboard_for_user(user):
+    # Decide which dashboard route a logged-in user should see based on role.
+    # This is the central role-based routing mechanism for authentication.
     role = None
     try:
         role = user.userprofile.role
@@ -26,6 +28,7 @@ def _dashboard_for_user(user):
 
 
 def signup(request):
+    # Handle signup form submission, create the user, and log them in.
     if request.user.is_authenticated:
         return redirect("dashboard")
 
@@ -43,22 +46,26 @@ def signup(request):
 
 @login_required
 def dashboard(request):
+    # Redirect the authenticated user to the role-specific dashboard.
     target = _dashboard_for_user(request.user)
     return redirect(target)
 
 
 @require_role(UserRole.PATIENT)
 def dashboard_patient(request):
+    # Patient-only landing page
     return render(request, "auth/dashboard_patient.html")
 
 
 @require_role(UserRole.CLINICIAN)
 def dashboard_clinician(request):
+    # Clinician-only landing page
     return render(request, "auth/dashboard_clinician.html")
 
 
 @require_role(UserRole.ADMIN)
 def dashboard_admin(request):
+    # Admin-only landing page
     return render(request, "auth/dashboard_admin.html")
 
 
