@@ -58,6 +58,9 @@ class Device(models.Model):
 class PressureFrame(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name="pressure_frames")
     recorded_at = models.DateTimeField()
+    # The full 32×32 pressure grid is stored as a nested list in JSON.
+    # This preserves the original matrix so the raw sensor data can be queried
+    # and rendered later in charts or heatmap views.
     data = models.JSONField()
     source_filename = models.CharField(max_length=200, blank=True)
     frame_index = models.PositiveIntegerField(null=True, blank=True)
@@ -89,15 +92,21 @@ class Alert(models.Model):
         return f"Alert for {self.patient_profile.user.username}: {self.message[:50]}"
 
 
+# Chronological messaging thread between a patient and their assigned clinician.
+# Keeps communication context-aware and visible alongside pressure data in both dashboards.
 class Message(models.Model):
+    # ForeignKey relationships to patient and clinician involved in the conversation.
     patient_profile = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, related_name="messages")
     clinician_profile = models.ForeignKey(ClinicianProfile, on_delete=models.CASCADE, related_name="messages")
+    # sender_role tracks who sent this message (PATIENT or CLINICIAN) for UI display (avatar, label).
     sender_role = models.CharField(
         max_length=20,
         choices=UserRole.choices,
         default=UserRole.PATIENT,
     )
+    # Message text content.
     body = models.TextField()
+    # Timestamp automatically set when message is created; used for chronological ordering.
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

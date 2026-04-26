@@ -72,27 +72,27 @@ class LoginTests(TestCase):
         response = self.client.post(reverse('login'), {
             'username': 'testpatient',
             'password': 'testpass123'
-        })
-        self.assertEqual(response.status_code, 302)  # Redirect after login
-        self.assertRedirects(response, reverse('dashboard'))
+        }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain[-1][0], reverse('dashboard_patient'))
 
     def test_successful_clinician_login(self):
         """Test successful login for clinician user"""
         response = self.client.post(reverse('login'), {
             'username': 'testclinician',
             'password': 'testpass123'
-        })
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('dashboard'))
+        }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain[-1][0], reverse('dashboard_clinician'))
 
     def test_successful_admin_login(self):
         """Test successful login for admin user"""
         response = self.client.post(reverse('login'), {
             'username': 'testadmin',
             'password': 'testpass123'
-        })
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('dashboard'))
+        }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain[-1][0], reverse('dashboard_admin'))
 
     def test_failed_login_wrong_password(self):
         """Test login with wrong password"""
@@ -117,9 +117,9 @@ class LoginTests(TestCase):
     def test_login_redirect_authenticated_user(self):
         """Test that authenticated users are redirected from login page"""
         self.client.login(username='testpatient', password='testpass123')
-        response = self.client.get(reverse('login'))
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('dashboard'))
+        response = self.client.get(reverse('login'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain[-1][0], reverse('dashboard_patient'))
 
     @override_settings(DEBUG=True)
     def test_demo_login_patient(self):

@@ -16,6 +16,9 @@ from core.models import (
 
 
 def pressure_level(value):
+    # Map a pressure value (mmHg) to a discrete level (0-4) for color coding.
+    # This determines which CSS class (swatch) is used in the heatmap.
+    # 0=low (blue), 1=normal (green), 2=moderate (yellow), 3=high (orange), 4=critical (red)
     value = float(value)
     if value <= 20:
         return 0
@@ -100,9 +103,11 @@ def patient_dashboard(request):
         or ClinicianProfile.objects.first()
     )
 
+    # Handle incoming messages from patient to their clinician.
     if request.method == "POST":
         body = request.POST.get("message", "").strip()
         if body and clinician:
+            # Create message with sender marked as PATIENT so clinician can identify who sent it.
             Message.objects.create(
                 patient_profile=patient_profile,
                 clinician_profile=clinician,
@@ -111,13 +116,15 @@ def patient_dashboard(request):
             )
         return redirect("dashboard_patient")
 
+    # Retrieve message thread: all messages between this patient and their clinician, ordered chronologically.
     message_thread = []
     if clinician:
         message_thread = Message.objects.filter(
             patient_profile=patient_profile,
             clinician_profile=clinician,
-        ).order_by("created_at")
+        ).order_by("created_at")  # Chronological order from oldest to newest.
 
+    # Get the latest pressure frame for this patient (if any) and compute display values.
     latest_frame = None
     device = patient_profile.devices.first()
     if device:
@@ -126,8 +133,11 @@ def patient_dashboard(request):
     if latest_frame and latest_frame.data:
         frame_data = latest_frame.data
         flattened = [float(v) for row in frame_data for v in row]
+        # Compute max and average pressure, as well as the status level for the latest frame.
         max_pressure = int(max(flattened))
         avg_pressure = int(sum(flattened) / len(flattened))
+        # Convert the raw pressure matrix into a grid of pressure_level codes (0-4).
+        # This grid is passed to the template where each cell renders as a colored div.
         grid = [[pressure_level(v) for v in row] for row in frame_data]
         status = pressure_status(max_pressure)
         recent_alerts = []

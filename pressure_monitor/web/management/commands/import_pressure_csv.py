@@ -10,8 +10,10 @@ from core.models import Device, PatientProfile, PressureFrame
 
 
 class Command(BaseCommand):
-    help = "Import pressure-mapping CSV files into the database as PressureFrame records."
-
+    help = "Import pressure-mapping CSV files into the database as PressureFrame records.
+    # The command imports one or more CSV files and converts each 32×32 pressure
+    # matrix into a nested Python list. That list is stored directly in the
+    # PressureFrame.data JSONField, preserving the full grid structure.
     def add_arguments(self, parser):
         parser.add_argument(
             "--dir",
@@ -40,6 +42,8 @@ class Command(BaseCommand):
         )
 
     def parse_csv_frames(self, csv_path):
+        # Parse one or more matrices from a CSV file.
+        # Each non-empty block of rows is treated as a single frame.
         frames = []
         current_frame = []
         with open(csv_path, newline="") as csvfile:
@@ -69,6 +73,8 @@ class Command(BaseCommand):
                     f"Inconsistent row lengths in {csv_path}: expected {width}, got {[len(row) for row in frame]}"
                 )
 
+            # Some CSVs contain a long list of rows that need to be split into
+            # multiple 32×32 frames. Otherwise keep the whole frame as-is.
             if width == 32 and len(frame) > 32 and len(frame) % 32 == 0:
                 for i in range(0, len(frame), 32):
                     normalized.append(frame[i : i + 32])
@@ -130,12 +136,15 @@ class Command(BaseCommand):
                 raise CommandError(str(exc))
 
             for frame_index, frame_data in enumerate(frames):
+                # Use file modification time when requested, otherwise use the import time.
                 if use_filetime:
                     timestamp = datetime.fromtimestamp(os.path.getmtime(csv_path))
                     recorded_at = timezone.make_aware(timestamp)
                 else:
                     recorded_at = timezone.now()
 
+                # Store the matrix directly in the JSONField so the raw pressure grid
+                # remains available for later analysis and charting.
                 obj, created_flag = PressureFrame.objects.get_or_create(
                     device=device,
                     source_filename=os.path.basename(csv_path),

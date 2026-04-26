@@ -239,7 +239,9 @@ def clinician_dashboard(request):
                   "You are not authorized to contact this patient."
               )
     
+      # Handle incoming messages from clinician to a patient.
       if body and patient:
+          # Create message with sender marked as CLINICIAN so patient can identify who sent it.
           Message.objects.create(
               patient_profile=patient,
               clinician_profile=clinician_profile,
@@ -266,12 +268,13 @@ def clinician_dashboard(request):
 
 
   assigned_patients = clinician_profile.assigned_patients.all()
+  # Retrieve message thread: all messages between clinician and selected patient, ordered chronologically.
   message_thread = []
   if patient:
       message_thread = Message.objects.filter(
           clinician_profile=clinician_profile,
           patient_profile=patient,
-      ).order_by("created_at")
+      ).order_by("created_at")  # Chronological order from oldest to newest.
 
 
 

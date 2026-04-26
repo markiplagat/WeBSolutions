@@ -177,24 +177,30 @@
     </div>
 
     {% if clinician %}
+      <!-- Message input form: allows patient to send comment to clinician -->
       <form method="post" class="msg-box" style="margin-bottom:0.75rem;">
         {% csrf_token %}
         <input class="msg-input" type="text" name="message" placeholder="Add a comment about pressure data..." required>
         <button class="send-btn" type="submit">➤</button>
       </form>
 
+      <!-- Message thread: chronological list of all messages between patient and their clinician -->
       <div class="thread">
         {% for m in message_thread %}
           <div class="msg" style="margin-bottom:.85rem;">
+            <!-- Avatar: stethoscope for clinician messages, person for patient messages -->
             <div class="msg__avatar">{% if m.sender_role == 'CLINICIAN' %}🩺{% else %}👤{% endif %}</div>
             <div class="msg__body">
+              <!-- Message metadata: sender name, timestamp, and label for patient's own messages -->
               <div class="msg__meta">
                 <strong>{% if m.sender_role == 'CLINICIAN' %}{{ clinician.user.get_full_name|default:clinician.user.username }}{% else %}You{% endif %}</strong>
                 <span>{{ m.created_at|date:"n/j/Y, P" }}</span>
                 {% if m.sender_role == 'PATIENT' %}
+                  <!-- "My message" label helps patient distinguish their own messages from clinician replies -->
                   <span class="pill2">My message</span>
                 {% endif %}
               </div>
+              <!-- Message content: the actual text sent -->
               <div class="msg__text">{{ m.body }}</div>
             </div>
           </div>
@@ -222,13 +228,18 @@ function pressureLevel(value) {
 }
 
 function pressureColor(value) {
-  if (value <= 20) return '#2563eb';
-  if (value <= 40) return '#22c55e';
-  if (value <= 60) return '#facc15';
-  if (value <= 80) return '#fb923c';
-  return '#ef4444';
+  // Map pressure values (mmHg) to hex colors for the heatmap visualization.
+  // Cool colors = low pressure (safe), warm colors = high/critical pressure (warning).
+  if (value <= 20) return '#2563eb';    // blue: low pressure
+  if (value <= 40) return '#22c55e';    // green: normal pressure
+  if (value <= 60) return '#facc15';    // yellow: moderate pressure
+  if (value <= 80) return '#fb923c';    // orange: high pressure
+  return '#ef4444';                     // red: critical pressure (>80 mmHg)
 }
 
+// Render the 32×32 pressure matrix as a color-coded grid on a canvas.
+// Each cell in the matrix becomes a small colored square.
+// The matrix is drawn left-to-right, top-to-bottom matching the body's spatial layout.
 function renderHeatmap(frameData, target, isSmall = false) {
   const canvas = typeof target === 'string' ? document.querySelector(target) : target;
   if (!frameData || !canvas || !canvas.getContext) return;
@@ -236,6 +247,7 @@ function renderHeatmap(frameData, target, isSmall = false) {
   const ctx = canvas.getContext('2d');
   const rows = frameData.length;
   const cols = frameData[0]?.length || 0;
+  // Use smaller cells for thumbnail views (3px) vs main heatmap (10px each)
   const cellSize = isSmall ? 3 : 10;
   const width = cols * cellSize;
   const height = rows * cellSize;
@@ -247,6 +259,8 @@ function renderHeatmap(frameData, target, isSmall = false) {
 
   ctx.clearRect(0, 0, width, height);
 
+  // Loop through each row (y) and column (x) of the pressure matrix.
+  // Paint each cell with the color corresponding to its pressure value.
   frameData.forEach((row, rowIndex) => {
     row.forEach((cellValue, colIndex) => {
       ctx.fillStyle = pressureColor(cellValue);
